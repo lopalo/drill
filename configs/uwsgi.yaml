@@ -1,0 +1,15 @@
+uwsgi:
+    socket: :80
+    protocol: uwsgi
+    chdir: /drill/backend
+    module: wsgi:app
+    stats: :9191
+    harakiri: 10
+    master: true
+    processes: 4
+    logto: /drill/logs/uwsgi.log
+    log-5xx: true
+    disable-logging: true
+
+    threads: 2  # enables GIL
+    py-autoreload: 1

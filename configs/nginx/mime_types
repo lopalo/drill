@@ -1,0 +1,18 @@
+types {
+    text/plain txt;
+    text/html html htm shtml;
+    text/css css;
+    text/xml xml rss;
+    text/x-component htc;
+    image/gif gif;
+    image/jpeg jpeg jpg;
+    image/png png;
+    image/x-icon ico;
+    image/x-jng jng;
+    application/x-javascript js;
+    application/json json;
+    application/pdf pdf;
+    application/zip zip;
+    audio/mpeg mp3;
+    video/mpeg mpeg mpg;
+}

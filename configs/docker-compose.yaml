@@ -1,0 +1,19 @@
+version: '2'
+services:
+    app-1:
+        container_name: app-1
+        image: lopalo/drill
+        volumes:
+            - "..:/drill"
+        ports:
+            - "127.0.0.1::9191"
+        command: uwsgi --yaml /drill/configs/uwsgi.yaml
+    nginx:
+        container_name: nginx
+        image: nginx:1.10.1
+        volumes:
+            - "..:/drill"
+        ports:
+            - "80:80"
+        command: nginx -c /drill/configs/nginx.conf
+
