@@ -5,4 +5,6 @@ db
 dist
 nohup.out
 .vagrant
+*/node_modules
+bundle.js*
 

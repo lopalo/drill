@@ -2,7 +2,7 @@ version: '2'
 services:
     app-1:
         container_name: app-1
-        image: lopalo/drill
+        image: lopalo/drill-backend
         volumes:
             - "..:/drill"
         ports:
