@@ -1,0 +1,17 @@
+
+
+.container {
+    height: 100vh;
+}
+
+.center {
+    height: 100%;
+
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
+
+.button-panel .btn {
+    margin-left: 2%
+}
