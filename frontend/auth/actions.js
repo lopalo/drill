@@ -1,12 +1,12 @@
 
-export const REQUEST_PROFILE = "profile/REQUEST_PROFILE";
-export const SET_PROFILE = "profile/SET_PROFILE";
+export const REQUEST_USER = "auth/REQUEST_USER";
+export const SET_USER = "auth/SET_USER";
 
 
-export const requestProfile = () => ({type: REQUEST_PROFILE});
+export const requestUser = () => ({type: REQUEST_USER});
 
 
-export const setProfile = (profile) => ({
-    type: SET_PROFILE,
-    profile
+export const setUser = (user) => ({
+    type: SET_USER,
+    user
 });

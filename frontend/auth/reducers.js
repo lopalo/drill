@@ -1,17 +1,17 @@
 import {combineReducers} from "redux";
 
-import {SET_PROFILE, REQUEST_PROFILE} from "./actions";
+import {SET_USER, REQUEST_USER} from "./actions";
 
 
-export const profile = (state=null, action) => (
-    action.type === SET_PROFILE ? action.profile : state
+export const user = (state=null, action) => (
+    action.type === SET_USER ? action.user : state
 );
 
 export const isLoading = (state=false, action) => {
     switch (action.type) {
-        case REQUEST_PROFILE:
+        case REQUEST_USER:
             return true;
-        case SET_PROFILE:
+        case SET_USER:
             return false;
         default:
             return state;

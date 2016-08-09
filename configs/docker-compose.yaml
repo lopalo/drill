@@ -1,12 +1,12 @@
 version: '2'
 services:
-    app-1:
-        container_name: app-1
+    wsgi_app:
+        container_name: wsgi_app
         image: lopalo/drill-backend
         volumes:
             - "..:/drill"
         ports:
-            - "127.0.0.1::9191"
+            - "127.0.0.1:9191:9191"
         command: uwsgi --yaml /drill/configs/uwsgi.yaml
     nginx:
         container_name: nginx
@@ -16,4 +16,22 @@ services:
         ports:
             - "80:80"
         command: nginx -c /drill/configs/nginx.conf
+    postgres:
+        container_name: postgres
+        image: postgres:9.5.3
+        ports:
+            - "127.0.0.1:5432:5432"
+        volumes:
+            - "../db:/var/lib/postgresql/data"
+    redis:
+        container_name: redis
+        image: redis:3.2.3
+        ports:
+            - "127.0.0.1:6379:6379"
+    script:
+        container_name: script
+        image: lopalo/drill-backend
+        volumes:
+            - "..:/drill"
+        command: bash
 

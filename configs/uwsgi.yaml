@@ -3,6 +3,7 @@ uwsgi:
     protocol: uwsgi
     chdir: /drill/backend
     module: wsgi:app
+    pyargv: /drill/configs/app.yaml
     stats: :9191
     harakiri: 10
     master: true

@@ -29,7 +29,6 @@ export default class Training extends React.Component {
             onListenClick
         } = this.props;
         let progress = phrase.progress / phrase.repeats * 100;
-        let progressBarStyle = {width: `${progress}%`};
         return (
           <div className="panel panel-default">
             <div className="panel-body text-center">
@@ -47,7 +46,7 @@ export default class Training extends React.Component {
               </div>
               <div className="progress progress-striped active">
                 <div className="progress-bar progress-bar-success"
-                     style={progressBarStyle}>
+                     style={{width: `${progress}%`}}>
                   {phrase.progress} / {phrase.repeats}
                 </div>
               </div>

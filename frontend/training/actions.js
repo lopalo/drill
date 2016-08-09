@@ -1,6 +1,6 @@
 
-export const REQUEST_TRAINING_SET = "training/REQUEST_TRAINING_SET";
-export const SET_TRAINING_SET = "training/SET_TRAINING_SET";
+export const REQUEST_WORKING_SET = "training/REQUEST_WORKING_SET";
+export const SET_WORKING_SET = "training/SET_WORKING_SET";
 
 export const COMPLETE_WORD = "training/COMPLETE_WORD";
 export const DELETE_COMPLETED_WORD = "training/DELETE_COMPLETED_WORD";
@@ -9,12 +9,12 @@ export const GIVE_UP = "training/GIVE_UP";
 export const LISTEN = "training/LISTEN";
 
 
-export const requestTrainingSet = () => ({type: REQUEST_TRAINING_SET});
+export const requestWorkingSet = () => ({type: REQUEST_WORKING_SET});
 
 
-export const setTrainingSet = (trainingSet) => ({
-    type: SET_TRAINING_SET,
-    trainingSet
+export const setWorkingSet = (workingSet) => ({
+    type: SET_WORKING_SET,
+    workingSet
 });
 
 

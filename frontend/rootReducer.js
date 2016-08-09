@@ -1,12 +1,12 @@
 import {combineReducers} from "redux";
 
-import {profile, auth} from "./auth/reducers";
+import {user, auth} from "./auth/reducers";
 import training from "./training/reducers";
 import myDictionary from "./my-dictionary/reducers";
 import dictionary from "./dictionary/reducers";
 
 const rootReducer = combineReducers({
-    profile,
+    user,
     auth,
     pages: combineReducers({
         training,

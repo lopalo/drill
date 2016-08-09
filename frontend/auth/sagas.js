@@ -1,23 +1,23 @@
 import {takeLatest} from "redux-saga";
 import {put} from "redux-saga/effects";
 
-import {REQUEST_PROFILE, setProfile} from "./actions";
+import {REQUEST_USER, setUser} from "./actions";
 import {fetchJSON} from "../common/sagas";
 
 
-function* fetchProfile() {
-    yield* takeLatest(REQUEST_PROFILE, function* () {
+function* fetchUser() {
+    yield* takeLatest(REQUEST_USER, function* () {
         try {
-            let profile = yield* fetchJSON("/profile");
-            yield put(setProfile(profile));
+            let user = yield* fetchJSON("/auth/user");
+            yield put(setUser(user));
         } catch (e) {
-            yield put(setProfile(null));
+            yield put(setUser(null));
         }
     });
 }
 
 const sagas = [
-    fetchProfile
+    fetchUser
 ];
 
 export default sagas;

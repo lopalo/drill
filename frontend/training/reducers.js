@@ -34,8 +34,8 @@ const ui = (state=initUiState, action) => {
 
 const data = (state=[], action) => {
     switch (action.type) {
-        case actions.SET_TRAINING_SET:
-            return action.trainingSet;
+        case actions.SET_WORKING_SET:
+            return action.workingSet;
         case actions.PASS_PHRASE:
             return state.map((p, idx) => phrase(p, idx, action));
         default:
@@ -45,11 +45,12 @@ const data = (state=[], action) => {
 
 const phrase = (state, index, action) => {
     switch (action.type) {
-        case actions.PASS_PHRASE:
+        case actions.PASS_PHRASE: {
             if (index !== action.phraseIndex) return state;
-            var {progress, repeats} = state;
+            let {progress, repeats} = state;
             progress += action.progress;
             return {...state, progress: Math.min(progress, repeats)};
+        }
         default:
             return state;
     }

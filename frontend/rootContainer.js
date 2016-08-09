@@ -37,10 +37,10 @@ NavItem.contextTypes = {
 
 class App extends React.Component {
     render() {
-        return this.props.profile === null ? <Auth /> : this.renderApp();
+        return this.props.user === null ? <Auth /> : this.renderApp();
     }
     renderApp() {
-        let userName = this.props.profile.userName;
+        let userName = this.props.user.name;
         return (
           <div>
             <div className="navbar navbar-inverse">
@@ -60,7 +60,7 @@ class App extends React.Component {
     }
 }
 
-const AppContainer = connect(s => ({profile: s.profile}))(App);
+const AppContainer = connect(s => ({user: s.user}))(App);
 
 
 const Root = () => {

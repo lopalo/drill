@@ -1,0 +1,11 @@
+
+db:
+    url: postgresql+psycopg2://postgres:postgres@postgres:5432/postgres
+redis:
+    host: redis
+    port: 6379
+    db: 0
+session:
+    duration-seconds: 900
+    secure: false
+

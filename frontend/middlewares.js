@@ -2,14 +2,14 @@
 import createLogger from "redux-logger";
 import createSagaMiddleware from "redux-saga";
 
-import profileSagas from "./auth/sagas";
+import authSagas from "./auth/sagas";
 import trainingSagas from "./training/sagas";
 import myDictionarySagas from "./my-dictionary/sagas";
 
 
 const configureSagas = sagaMiddleware => {
     let sagas = [
-        ...profileSagas,
+        ...authSagas,
         ...trainingSagas,
         ...myDictionarySagas
     ];

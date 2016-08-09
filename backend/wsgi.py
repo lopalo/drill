@@ -1,3 +1,3 @@
-from main import build_app
+from main import configure_app
 
-app = build_app()
+app = configure_app()

@@ -1,7 +1,7 @@
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 
-import {requestProfile} from "../actions";
+import {requestUser} from "../actions";
 import Auth from "../components/Auth";
 
 
@@ -10,7 +10,7 @@ const mapStateToProps = s => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-    onDidMount: requestProfile
+    onDidMount: requestUser
 }, dispatch);
 
 
