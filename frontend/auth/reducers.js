@@ -1,31 +1,36 @@
 import {combineReducers} from "redux";
+import {modelReducer, formReducer} from "react-redux-form";
 
-import {SET_USER, REQUEST_USER} from "./actions";
+
+export const user = (state=null) => state;
 
 
-export const user = (state=null, action) => (
-    action.type === SET_USER ? action.user : state
-);
+const isLoading = (state=false) => state;
 
-export const isLoading = (state=false, action) => {
-    switch (action.type) {
-        case REQUEST_USER:
-            return true;
-        case SET_USER:
-            return false;
-        default:
-            return state;
-    }
+
+
+const initialLoginState = {
+    email: "",
+    password: "",
+    serverError: null
 };
 
 
-const login = (state={}) => state;
+const initialRegisterState = {
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    serverError: null
+};
 
-
-const register = (state={}) => state;
-
-
-export const auth = combineReducers({isLoading, login, register});
+export const auth = combineReducers({
+    isLoading,
+    login: modelReducer("auth.login", initialLoginState),
+    loginForm: formReducer("auth.login", initialLoginState),
+    register: modelReducer("auth.register", initialRegisterState),
+    registerForm: formReducer("auth.register", initialRegisterState),
+});
 
 
 

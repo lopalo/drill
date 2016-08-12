@@ -10,11 +10,12 @@ import {
 import {createHashHistory} from "history";
 import {connect} from "react-redux";
 
-import Auth from "./auth/containers/Auth";
-import Profile from "./profile/containers/Profile";
-import Training from "./training/containers/Training";
-import MyDictionary from "./my-dictionary/containers/MyDictionary";
-import dictionary from "./dictionary/containers/Dictionary";
+import Auth from "./auth/components/Auth";
+import Logout from "./auth/components/Logout";
+import Profile from "./profile/components/Profile";
+import Training from "./training/components/Training";
+import MyDictionary from "./my-dictionary/components/MyDictionary";
+import dictionary from "./dictionary/components/Dictionary";
 
 
 
@@ -35,7 +36,7 @@ NavItem.contextTypes = {
 };
 
 
-class App extends React.Component {
+class AppComponent extends React.Component {
     render() {
         return this.props.user === null ? <Auth /> : this.renderApp();
     }
@@ -52,6 +53,7 @@ class App extends React.Component {
                 <NavItem to="/profile">
                   <span className="text text-success">{userName}</span>
                 </NavItem>
+                <li className="nav-item"><Logout /></li>
               </ul>
             </div>
             {this.props.children}
@@ -60,14 +62,14 @@ class App extends React.Component {
     }
 }
 
-const AppContainer = connect(s => ({user: s.user}))(App);
+const App = connect(s => ({user: s.user}))(AppComponent);
 
 
-const Root = () => {
+export default () => {
     let history = useRouterHistory(createHashHistory)({queryKey: false});
     return (
       <Router history={history}>
-        <Route path="/" component={AppContainer}>
+        <Route path="/" component={App}>
           <IndexRedirect to="my-dictionary" />
           <Route path="training" component={Training} />
           <Route path="my-dictionary" component={MyDictionary} />
@@ -78,6 +80,5 @@ const Root = () => {
     );
 };
 
-export default Root;
 
 

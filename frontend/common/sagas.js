@@ -1,7 +1,7 @@
 import {call} from "redux-saga/effects";
 
 
-export function* fetchJSON(url, options={}) {
+export function* fetchJSON(url, body=null, options={}) {
     let opts = {
         method: "get",
         headers: {
@@ -11,9 +11,15 @@ export function* fetchJSON(url, options={}) {
         credentials: "same-origin",
         ...options
     };
-    if (opts.body) {
-        opts.body = JSON.stringify(opts.body);
+    if (body !== null) {
+        opts.method = "post";
+        opts.body = JSON.stringify(body);
     }
     let response = yield call(fetch, url, opts);
-    return yield call(() => response.json());
+    if (response.status >= 200 && response.status < 300) {
+        return yield call(() => response.json());
+    }
+    var error = new Error(response.statusText);
+    error.response = response;
+    throw error;
 }

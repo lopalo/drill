@@ -1,6 +1,13 @@
 import React from "react";
+import {bindActionCreators} from "redux";
+import {connect} from "react-redux";
+import {createStructuredSelector} from "reselect";
 
-export default class TrainingWrapper extends React.Component {
+import {requestWorkingSet} from "../actions";
+import {phrase} from "../selectors";
+
+
+class TrainingWrapper extends React.Component {
     componentDidMount() {
         this.props.onDidMount();
     }
@@ -14,4 +21,16 @@ export default class TrainingWrapper extends React.Component {
         );
     }
 }
+
+
+const mapStateToProps = createStructuredSelector({phrase});
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    onDidMount: requestWorkingSet
+}, dispatch);
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(TrainingWrapper);
 

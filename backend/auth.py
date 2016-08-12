@@ -92,7 +92,6 @@ def require_admin(req, resp, resource, params):
             "Permission Denied", "User must be an admin")
 
 
-
 class UserHandler(Handler):
 
     @falcon.before(require_user)
@@ -112,7 +111,7 @@ class LoginHandler(Handler):
         error = "Wrong email or password"
 
         sel = users.select().where(users.c.email == body['email'])
-        with self.db_engine.begin() as conn:
+        with self.db.begin() as conn:
             user_record = conn.execute(sel).fetchone()
         if user_record is None:
             result['error'] = error
@@ -131,8 +130,9 @@ class LoginHandler(Handler):
 class LogoutHandler(Handler):
 
     @falcon.before(require_user)
+    @falcon.after(json_response)
     def on_post(self, req, resp):
-        req.context['user'].delete_session(self.app_context, req)
+        req.context['user'].delete_session(self.app_context, resp)
 
 
 class RegisterHandler(Handler):
@@ -151,7 +151,7 @@ class RegisterHandler(Handler):
             password=bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
         )
         ins = users.insert().values(**values).returning(*users.c)
-        with self.db_engine.begin() as conn:
+        with self.db.begin() as conn:
             try:
                 user_record = conn.execute(ins).fetchone()
             except IntegrityError:

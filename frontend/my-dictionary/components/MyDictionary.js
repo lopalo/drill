@@ -1,9 +1,8 @@
 import React from "react";
 
-const MyDictionary = () => (
+export default () => (
   <div className="alert alert-success">My Dictionary</div>
 );
 
 
-export default MyDictionary;
 

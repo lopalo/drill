@@ -1,8 +1,7 @@
 
 
-const dictionary = (state={
+export default (state={
     ui: {},
     data: {}
 }) => state;
 
-export default dictionary;

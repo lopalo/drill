@@ -1,10 +1,10 @@
 import {createStore, applyMiddleware} from "redux";
 
 import rootReducer from "./rootReducer";
-import configureMiddlewares from "./middlewares";
+import {configureMiddlewares} from "./middlewares";
 
 
-const configureStore = () => {
+export default () => {
     let {middlewares, onStoreCreated} = configureMiddlewares();
     let store = createStore(
         rootReducer,
@@ -14,4 +14,3 @@ const configureStore = () => {
     return store;
 };
 
-export default configureStore;

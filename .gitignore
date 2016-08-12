@@ -1,4 +1,6 @@
 *.pyc
+*.log
+test_phrases.yaml
 *logs
 */__pycache__
 db

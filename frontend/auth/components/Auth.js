@@ -1,9 +1,14 @@
 import React from "react";
+import {bindActionCreators} from "redux";
+import {connect} from "react-redux";
 
-import Login from "../containers/Login";
-import Register from "../containers/Register";
 
-export default class Auth extends React.Component {
+import Login from "./Login";
+import Register from "./Register";
+import {requestUser} from "../actions";
+
+
+class Auth extends React.Component {
     componentDidMount() {
         this.props.onDidMount();
     }
@@ -17,10 +22,23 @@ export default class Auth extends React.Component {
         }
         return (
           <div className="row center">
-            <div className="col-md-6"><Login /></div>
-            <div className="col-md-6"><Register /></div>
+            <div>
+              <div className="col-md-6"><Login /></div>
+              <div className="col-md-6"><Register /></div>
+            </div>
           </div>
         );
     }
 }
 
+
+const mapStateToProps = s => ({
+    isLoading: s.auth.isLoading
+});
+
+const mapDispatchToProps = dispatch => bindActionCreators({
+    onDidMount: requestUser
+}, dispatch);
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(Auth);

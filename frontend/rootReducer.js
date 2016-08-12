@@ -1,11 +1,12 @@
 import {combineReducers} from "redux";
 
+import {setProperty} from "./common/reducers";
 import {user, auth} from "./auth/reducers";
 import training from "./training/reducers";
 import myDictionary from "./my-dictionary/reducers";
 import dictionary from "./dictionary/reducers";
 
-const rootReducer = combineReducers({
+const reducer = combineReducers({
     user,
     auth,
     pages: combineReducers({
@@ -15,4 +16,8 @@ const rootReducer = combineReducers({
     })
 });
 
-export default rootReducer;
+
+export default (state, action) => (
+    reducer(setProperty(state, action), action)
+);
+

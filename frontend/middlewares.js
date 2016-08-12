@@ -1,5 +1,6 @@
 /*global DEBUG*/
 import createLogger from "redux-logger";
+import thunkMiddleware from "redux-thunk";
 import createSagaMiddleware from "redux-saga";
 
 import authSagas from "./auth/sagas";
@@ -17,8 +18,9 @@ const configureSagas = sagaMiddleware => {
 };
 
 
-const configureMiddlewares = () => {
+export const configureMiddlewares = () => {
     let middlewares = [];
+    middlewares.push(thunkMiddleware);
     let sagaMiddleware = createSagaMiddleware();
     let onStoreCreated = () => configureSagas(sagaMiddleware);
     middlewares.push(sagaMiddleware);
@@ -28,5 +30,4 @@ const configureMiddlewares = () => {
     return {middlewares, onStoreCreated};
 };
 
-export default configureMiddlewares;
 

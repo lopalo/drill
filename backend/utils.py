@@ -47,5 +47,5 @@ class Handler:
         self.app_context = app_context
 
     @property
-    def db_engine(self):
+    def db(self):
         return self.app_context.db_engine
