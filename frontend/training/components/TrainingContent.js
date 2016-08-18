@@ -64,14 +64,14 @@ class TrainingContent extends React.Component {
                 </div>
               </div>
               <div className="progress progress-striped active">
-                <div className="progress-bar progress-bar-success"
+                <div className="progress-bar progress-bar-info"
                      style={{width: `${progress}%`}}>
                   {phrase.progress} / {phrase.repeats}
                 </div>
               </div>
               <div className="button-panel">
                 {!isCompleted && !isGivenUp &&
-                  <button className="btn btn-danger" onClick={onGiveUpClick}>
+                  <button className="btn btn-default" onClick={onGiveUpClick}>
                     Give Up
                   </button>
                 }
@@ -106,7 +106,7 @@ class TrainingContent extends React.Component {
 const WordStatus = ({actual, status}) => {
     if (!actual) return null;
     if (status === "ok") {
-        return <div className="btn btn-success">{actual}</div>;
+        return <div className="btn btn-info">{actual}</div>;
     }
     if (status === "error") {
         return <div className="btn btn-danger">{actual}</div>;

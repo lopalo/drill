@@ -12,12 +12,19 @@ export function* fetchJSON(url, body=null, options={}) {
         ...options
     };
     if (body !== null) {
-        opts.method = "post";
+        if (opts.method === "get") {
+            opts.method = "post";
+        }
         opts.body = JSON.stringify(body);
     }
     let response = yield call(fetch, url, opts);
     if (response.status >= 200 && response.status < 300) {
-        return yield call(() => response.json());
+        try {
+            return yield call(() => response.json());
+        }
+        catch (e) {
+            return null;
+        }
     }
     var error = new Error(response.statusText);
     error.response = response;

@@ -4,10 +4,8 @@ import {
     Route,
     IndexRedirect,
     Link,
-    useRouterHistory,
     routerShape
 } from "react-router";
-import {createHashHistory} from "history";
 import {connect} from "react-redux";
 
 import Auth from "./auth/components/Auth";
@@ -15,7 +13,7 @@ import Logout from "./auth/components/Logout";
 import Profile from "./profile/components/Profile";
 import Training from "./training/components/Training";
 import MyDictionary from "./my-dictionary/components/MyDictionary";
-import dictionary from "./dictionary/components/Dictionary";
+import dictionaryRoutes from "./dictionary/components/Routes";
 
 
 
@@ -65,20 +63,17 @@ class AppComponent extends React.Component {
 const App = connect(s => ({user: s.user}))(AppComponent);
 
 
-export default () => {
-    let history = useRouterHistory(createHashHistory)({queryKey: false});
-    return (
-      <Router history={history}>
-        <Route path="/" component={App}>
-          <IndexRedirect to="my-dictionary" />
-          <Route path="training" component={Training} />
-          <Route path="my-dictionary" component={MyDictionary} />
-          <Route path="dictionary" component={dictionary} />
-          <Route path="profile" component={Profile} />
-        </Route>
-      </Router>
-    );
-};
+export default ({history}) => (
+  <Router history={history}>
+    <Route path="/" component={App}>
+      <IndexRedirect to="my-dictionary" />
+      <Route path="training" component={Training} />
+      <Route path="my-dictionary" component={MyDictionary} />
+      {dictionaryRoutes()}
+      <Route path="profile" component={Profile} />
+    </Route>
+  </Router>
+);
 
 
 

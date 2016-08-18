@@ -8,12 +8,8 @@ import {fetchJSON} from "../common/sagas";
 
 function* fetchWorkingSet() {
     yield* takeLatest(REQUEST_WORKING_SET, function* () {
-        try {
-            let set = yield* fetchJSON("/training/working-set");
-            yield put(setProperty("pages.training.data", set));
-        } catch (e) {
-            yield put(setProperty("pages.training.data", []));
-        }
+        let set = yield* fetchJSON("/training/working-set");
+        yield put(setProperty("pages.training.workingSet", set));
     });
 }
 

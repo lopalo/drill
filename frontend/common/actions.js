@@ -6,3 +6,8 @@ export const setProperty = (path, value) => ({
     path,
     value
 });
+
+
+export const empty = () => ({type: null});
+
+

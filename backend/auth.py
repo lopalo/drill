@@ -7,7 +7,7 @@ import bcrypt
 
 from sqlalchemy.exc import IntegrityError
 
-from models import users
+from models import user
 from utils import Handler, json_request, json_response, make_handlers
 
 
@@ -24,7 +24,8 @@ class User:
         fields = self._fields
         return {
             'name': fields['name'],
-            'email': fields['name']
+            'email': fields['name'],
+            'isAdmin': fields['is_admin']
         }
 
     @property
@@ -110,27 +111,26 @@ class LoginHandler(Handler):
         result = resp.body = {'error': None, 'user': None}
         error = "Wrong email or password"
 
-        sel = users.select().where(users.c.email == body['email'])
+        sel = user.select().where(user.c.email == body['email'])
         with self.db.begin() as conn:
             user_record = conn.execute(sel).fetchone()
         if user_record is None:
             result['error'] = error
             return
 
-        user = User(user_record.items())
+        usr = User(user_record.items())
         password = body['password'].encode("utf-8")
-        user_password = user.password.encode("utf-8")
+        user_password = usr.password.encode("utf-8")
         if bcrypt.hashpw(password, user_password) != user_password:
             result['error'] = error
             return
-        user.create_session(self.app_context, resp)
-        result['user'] = user.client_view
+        usr.create_session(self.app_context, resp)
+        result['user'] = usr.client_view
 
 
 class LogoutHandler(Handler):
 
     @falcon.before(require_user)
-    @falcon.after(json_response)
     def on_post(self, req, resp):
         req.context['user'].delete_session(self.app_context, resp)
 
@@ -150,16 +150,16 @@ class RegisterHandler(Handler):
             email=body['email'],
             password=bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
         )
-        ins = users.insert().values(**values).returning(*users.c)
+        ins = user.insert().values(**values).returning(*user.c)
         with self.db.begin() as conn:
             try:
                 user_record = conn.execute(ins).fetchone()
             except IntegrityError:
                 result['error'] = "E-mail is already used"
                 return
-        user = User(user_record.items())
-        user.create_session(self.app_context, resp)
-        result['user'] = user.client_view
+        usr = User(user_record.items())
+        usr.create_session(self.app_context, resp)
+        result['user'] = usr.client_view
 
 
 configure_handlers = make_handlers("/auth/", [

@@ -8,17 +8,21 @@ const training = state => state.pages.training;
 
 const ui = create(training, training => training.ui);
 
-const data = create(training, training => training.data);
+const workingSet = create(training, training => training.workingSet);
 
 const phraseIndex = create(ui, ui => ui.phraseIndex);
 
 const nextPhraseIndex = create(
     phraseIndex,
-    data,
-    (index, data) => data.length - 1 === index ? 0 : index + 1
+    workingSet,
+    (index, workingSet) => workingSet.length - 1 === index ? 0 : index + 1
 );
 
-const phrase = create(data, phraseIndex, (data, index) => data[index]);
+const phrase = create(
+    workingSet,
+    phraseIndex,
+    (workingSet, index) => workingSet[index]
+);
 
 
 const getWords = text => text.split(" ");

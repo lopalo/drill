@@ -6,13 +6,14 @@ import {render} from "react-dom";
 import {Provider} from "react-redux";
 
 import Root from "./rootComponent";
-import configureStore from "./store";
+import {configureStore} from "./store";
 
-const store = configureStore();
+
+const {store, history} = configureStore();
 
 render(
     <Provider store={store}>
-      <Root />
+      <Root history={history} />
     </Provider>,
     document.getElementById("app")
 );

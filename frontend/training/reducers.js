@@ -33,7 +33,7 @@ const ui = (state=initialUiState, action) => {
     }
 };
 
-const data = (state=[], action) => {
+const workingSet = (state=[], action) => {
     switch (action.type) {
         case actions.SET_WORKING_SET:
             return action.workingSet;
@@ -61,7 +61,7 @@ const phrase = (state, action) => {
 
 export default combineReducers({
     ui,
-    data
+    workingSet
 });
 
 

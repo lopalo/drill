@@ -1,6 +1,6 @@
 
 export default (state={
     ui: {},
-    data: {}
+    list: []
 }) => state;
 

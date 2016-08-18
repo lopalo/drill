@@ -1,4 +1,5 @@
 import {combineReducers} from "redux";
+import {routerReducer} from "react-router-redux";
 
 import {setProperty} from "./common/reducers";
 import {user, auth} from "./auth/reducers";
@@ -13,7 +14,8 @@ const reducer = combineReducers({
         training,
         myDictionary,
         dictionary
-    })
+    }),
+    routing: routerReducer
 });
 
 

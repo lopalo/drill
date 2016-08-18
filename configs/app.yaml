@@ -8,4 +8,6 @@ redis:
 session:
     duration-seconds: 900
     secure: false
+my-dictionary:
+    default-repeats: 5
 
