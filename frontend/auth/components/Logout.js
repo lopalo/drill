@@ -6,7 +6,7 @@ import {requestLogout} from "../actions";
 
 
 const Logout = ({onClick}) => (
-  <a href="#" className="btn btn-link" onClick={onClick}>
+  <a href="/" className="btn btn-link" onClick={onClick}>
     <span className="glyphicon glyphicon-log-out"></span>
   </a>
 );

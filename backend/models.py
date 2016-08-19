@@ -5,9 +5,12 @@ from sqlalchemy import (
     String,
     Text,
     Boolean,
+    DateTime,
     Enum,
     MetaData,
-    ForeignKey
+    ForeignKey,
+    CheckConstraint,
+    column
 )
 from sqlalchemy.sql import expression as ex
 
@@ -67,6 +70,22 @@ theme_phrase = Table(
            ForeignKey("phrase.id", onupdate="CASCADE", ondelete="CASCADE"),
            primary_key=True,
            index=True)
+)
+
+
+user_phrase = Table(
+    "user_phrase", metadata,
+    Column("user_id",
+           ForeignKey("user.id", onupdate="CASCADE", ondelete="CASCADE"),
+           primary_key=True),
+    Column("phrase_id",
+           ForeignKey("phrase.id", onupdate="CASCADE", ondelete="CASCADE"),
+           primary_key=True,
+           index=True),
+    Column("completion_time", DateTime(timezone=True), index=True),
+    Column("repeats", Integer, nullable=False),
+    Column("progress", Integer, nullable=False, server_default="0"),
+    CheckConstraint(column("progress") <= column("repeats"))
 )
 
 

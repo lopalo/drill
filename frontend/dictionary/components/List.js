@@ -54,10 +54,12 @@ const ListItem = ({row, isAdmin, onDelete, onAddToMyDict}) => (
     <td>{row.targetText}</td>
     <td>{row.sourceLang}</td>
     <td>{row.targetLang}</td>
-    <td>
-      <button className="btn btn-default" onClick={onAddToMyDict}>
-        <span className="glyphicon glyphicon-plus"></span>
-      </button>
+    <td className="col-md-1">
+      {!row.isAdded &&
+        <button className="btn btn-default" onClick={onAddToMyDict}>
+          <span className="glyphicon glyphicon-plus"></span>
+        </button>
+      }
     </td>
     {isAdmin &&
       <td>

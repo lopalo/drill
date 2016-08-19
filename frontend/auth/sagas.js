@@ -1,5 +1,4 @@
-import {takeLatest} from "redux-saga";
-import {put, call} from "redux-saga/effects";
+import {put} from "redux-saga/effects";
 import {actions as formActions} from "react-redux-form";
 
 import {setProperty} from "../common/actions";
@@ -9,7 +8,7 @@ import {
     REQUEST_REGISTER,
     REQUEST_LOGOUT
 } from "./actions";
-import {fetchJSON} from "../common/sagas";
+import {fetchJSON, takeLatestSafely as takeLatest} from "../common/sagas";
 
 
 function* fetchUser() {
@@ -57,8 +56,7 @@ function* register() {
 
 function* logout() {
     yield* takeLatest(REQUEST_LOGOUT, function* () {
-        yield* fetchJSON("/auth/logout", null, {method: "post"});
-        yield put(setProperty("user", null));
+        yield* fetchJSON("/auth/logout", null, {method: "POST"});
     });
 }
 

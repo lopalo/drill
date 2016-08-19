@@ -5,15 +5,12 @@ import {connect} from "react-redux";
 
 import Login from "./Login";
 import Register from "./Register";
-import {requestUser, resetForms} from "../actions";
+import {requestUser} from "../actions";
 
 
 class Auth extends React.Component {
     componentDidMount() {
         this.props.onDidMount();
-    }
-    componentWillUnmount() {
-        this.props.onWillUnmount();
     }
     render() {
         if (this.props.isLoading) {
@@ -40,7 +37,6 @@ const mapStateToProps = s => ({
 });
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-    onWillUnmount: resetForms,
     onDidMount: requestUser
 }, dispatch);
 

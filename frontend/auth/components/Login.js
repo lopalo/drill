@@ -33,7 +33,7 @@ const Login = ({serverError, onSubmit}) => (
         <FormGroup model={field("email")}
                    errorMessages={{email: "Is not a valid e-mail address"}}>
           <label className="control-label">E-mail</label>
-          <input type="text" className="form-control" />
+          <input type="email" className="form-control" />
         </FormGroup>
 
         <FormGroup model={field("password")}

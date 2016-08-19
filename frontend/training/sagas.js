@@ -1,9 +1,8 @@
-import {takeLatest} from "redux-saga";
 import {put} from "redux-saga/effects";
 
 import {REQUEST_WORKING_SET} from "./actions";
 import {setProperty} from "../common/actions";
-import {fetchJSON} from "../common/sagas";
+import {fetchJSON, takeLatestSafely as takeLatest} from "../common/sagas";
 
 
 function* fetchWorkingSet() {

@@ -1,9 +1,10 @@
+import {takeLatest} from "redux-saga";
 import {call} from "redux-saga/effects";
 
 
 export function* fetchJSON(url, body=null, options={}) {
     let opts = {
-        method: "get",
+        method: "GET",
         headers: {
             "Accept": "application/json",
             "Content-Type": "application/json"
@@ -12,8 +13,8 @@ export function* fetchJSON(url, body=null, options={}) {
         ...options
     };
     if (body !== null) {
-        if (opts.method === "get") {
-            opts.method = "post";
+        if (opts.method === "GET") {
+            opts.method = "POST";
         }
         opts.body = JSON.stringify(body);
     }
@@ -29,4 +30,17 @@ export function* fetchJSON(url, body=null, options={}) {
     var error = new Error(response.statusText);
     error.response = response;
     throw error;
+}
+
+
+export function* takeLatestSafely(pattern, saga, ...args) {
+    //TODO: fix it
+    while (true) {
+        try {
+            yield* takeLatest(pattern, saga, ...args);
+        } catch (e) {
+            console.error(e, e.stack);
+        }
+    }
+
 }
