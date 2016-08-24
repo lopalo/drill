@@ -1,4 +1,4 @@
-import {takeLatest} from "redux-saga";
+import {takeEvery, takeLatest} from "redux-saga";
 import {call} from "redux-saga/effects";
 
 
@@ -33,14 +33,23 @@ export function* fetchJSON(url, body=null, options={}) {
 }
 
 
-export function* takeLatestSafely(pattern, saga, ...args) {
-    //TODO: fix it
+export function* takeEverySafely(pattern, saga, ...args) {
     while (true) {
         try {
-            yield* takeLatest(pattern, saga, ...args);
+            yield call(takeEvery, pattern, saga, ...args);
         } catch (e) {
             console.error(e, e.stack);
         }
     }
+}
 
+
+export function* takeLatestSafely(pattern, saga, ...args) {
+    while (true) {
+        try {
+            yield call(takeLatest, pattern, saga, ...args);
+        } catch (e) {
+            console.error(e, e.stack);
+        }
+    }
 }

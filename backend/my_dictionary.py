@@ -1,52 +1,63 @@
-import falcon
+from falcon import before, after
 from sqlalchemy import Float, select, and_, cast
+from sqlalchemy.sql import func
 
 from utils import Handler, json_response, json_request, make_handlers
 from auth import require_user
 from models import phrase, user_phrase
 
 
-def phrase_view(fields):
-    return {
-        'id': fields.id,
-        'sourceText': fields.source_text,
-        'targetText': fields.target_text,
-        'completionTime': fields.completion_time,
-        'repeats': fields.repeats,
-        'progress': fields.progress
-    }
+def phrase_view(time_format):
+    def phrase_view_(row):
+        completion_time = row.completion_time
+        if completion_time is not None:
+            completion_time = completion_time.strftime(time_format)
+        return {
+            'id': row.id,
+            'sourceText': row.source_text,
+            'targetText': row.target_text,
+            'completionTime': completion_time,
+            'repeats': row.repeats,
+            'progress': row.progress
+        }
+    return phrase_view_
 
 
-@falcon.before(require_user)
+def select_expression(user_id):
+    p = phrase.c
+    upc = user_phrase.c
+
+    columns = [
+        p.id, p.source_text, p.target_text,
+        upc.completion_time, upc.repeats, upc.progress
+    ]
+    joined = user_phrase.join(phrase, upc.phrase_id == p.id)
+    sel = (
+        select(columns).select_from(joined).
+        where(upc.user_id == user_id).
+        order_by(
+            upc.completion_time.asc().nullsfirst(),
+            (cast(upc.progress, Float) / upc.repeats).asc()
+        )
+    )
+    return sel
+
+
+@before(require_user)
 class ListHandler(Handler):
 
-    @falcon.after(json_response)
+    @after(json_response)
     def on_get(self, req, resp):
-        user_id = req.context['user'].id
-        p = phrase.c
-        up = user_phrase.c
-
-        columns = [
-            p.id, p.source_text, p.target_text,
-            up.completion_time, up.repeats, up.progress
-        ]
-        joined = user_phrase.join(phrase, up.phrase_id == p.id)
-        sel = (
-            select(columns).select_from(joined).
-            where(up.user_id == user_id).
-            order_by(
-                up.completion_time.asc().nullsfirst(),
-                (cast(up.progress, Float) / up.repeats).asc()
-            )
-        )
+        sel = select_expression(req.context['user'].id)
         rows = self.db.execute(sel).fetchall()
-        resp.body = list(map(phrase_view, rows))
+        dt_format = self.app_context.config['my-dictionary']['datetime-format']
+        resp.body = list(map(phrase_view(dt_format), rows))
 
 
-@falcon.before(require_user)
+@before(require_user)
 class PhraseHandler(Handler):
 
-    @falcon.before(json_request)
+    @before(json_request)
     def on_post(self, req, resp):
         repeats = self.app_context.config['my-dictionary']['default-repeats']
         user_id = req.context['user'].id
@@ -58,7 +69,7 @@ class PhraseHandler(Handler):
         )
         self.db.execute(ins)
 
-    @falcon.before(json_request)
+    @before(json_request)
     def on_patch(self, req, resp, phrase_id):
         user_id = req.context['user'].id
         body = req.context['body']

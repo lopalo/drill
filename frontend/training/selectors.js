@@ -1,5 +1,6 @@
 import zipWith from "lodash/zipWith";
 import every from "lodash/every";
+import last from "lodash/last";
 
 import {createSelector as create} from "reselect";
 
@@ -54,6 +55,17 @@ const isCompleted = create(
     )
 );
 
+
+const isLastWord = create(
+    targetWords,
+    ui,
+    (target, ui) => target.length == ui.completedWords.length + 1
+);
+
+
+const lastWord = create(targetWords, last);
+
+
 export {
     ui,
     phrase,
@@ -61,7 +73,9 @@ export {
     nextPhraseIndex,
     wordsStatus,
     isCompleted,
-    targetWords
+    targetWords,
+    isLastWord,
+    lastWord
 };
 
 

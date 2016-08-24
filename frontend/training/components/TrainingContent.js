@@ -16,23 +16,49 @@ import {
     wordsStatus,
     isCompleted,
     phrase,
+    isLastWord,
+    lastWord
 } from "../selectors";
 
 
 class TrainingContent extends React.Component {
-    handleTextInput(event) {
-        let value = event.target.value;
-        if (!value) {
-            this.props.onWordDeleted();
-            event.target.value = " ";
-            return;
+    constructor(props) {
+        super(props);
+        this._input = null;
+    }
+    handleTextInput() {
+        if (!this.props.isLastWord) return;
+        var val = this._input.value.trim();
+        if (val === this.props.lastWord) {
+            this.props.onWordCompleted(val);
+            this._input.value = "";
         }
-        if (value.slice(-1) === " ") {
-            value = value.trim();
-            if (value) {
-                this.props.onWordCompleted(event.target.value.trim());
-                event.target.value = " ";
-            }
+    }
+    handleKeyDown(event) {
+        var val = this._input.value.trim();
+        switch (event.key) {
+            case " ":
+            case "Enter":
+                if (val) {
+                    this.props.onWordCompleted(val);
+                    this._input.value = "";
+                }
+                break;
+            case "Backspace":
+            case "Delete":
+                if (!val) {
+                    this.props.onWordDeleted();
+                    this._input.value = "";
+                }
+                break;
+            case "Escape":
+                this.props.onGiveUpClick();
+                break;
+        }
+    }
+    handleButtonKeyDown(event) {
+        if (event.keyCode === 76) {
+            this.props.onListenClick();
         }
     }
     render() {
@@ -41,6 +67,7 @@ class TrainingContent extends React.Component {
             isGivenUp,
             isCompleted,
             wordsStatus,
+            speechSynthIsActive,
 
             onProgressClick,
             onNextClick,
@@ -48,6 +75,16 @@ class TrainingContent extends React.Component {
             onListenClick
         } = this.props;
         let progress = phrase.progress / phrase.repeats * 100;
+        let barClass = "progress-bar ";
+        if (phrase.isCompleted) {
+            barClass += "progress-bar-success";
+        } else {
+            barClass += "progress-bar-info";
+        }
+        let listenBtnClass = "btn btn-default";
+        if (speechSynthIsActive) {
+            listenBtnClass += " active";
+        }
         return (
           <div className="panel panel-default">
             <div className="panel-body text-center">
@@ -56,16 +93,19 @@ class TrainingContent extends React.Component {
                 <div className="panel-body form-inline">
                   {wordsStatus.map((i, idx) => <WordStatus key={idx} {...i} />)}
                   {!isCompleted && !isGivenUp &&
-                    <input type="text"
-                           className="form-control"
-                           onChange={e => this.handleTextInput(e)}
-                           autoFocus={true} />
+                    <input
+                      type="text"
+                      className="form-control"
+                      onChange={() => this.handleTextInput()}
+                      onKeyDown={e => this.handleKeyDown(e)}
+                      ref={i => this._input = i}
+                      autoFocus={true} />
                   }
                 </div>
               </div>
               <div className="progress progress-striped active">
-                <div className="progress-bar progress-bar-info"
-                     style={{width: `${progress}%`}}>
+                <div className={barClass}
+                     style={{width: `${progress}%`, minWidth: "4em"}}>
                   {phrase.progress} / {phrase.repeats}
                 </div>
               </div>
@@ -76,21 +116,25 @@ class TrainingContent extends React.Component {
                   </button>
                 }
                 {isCompleted &&
-                  <button className="btn btn-success"
-                          onClick={onProgressClick}
-                          autoFocus={true}>
+                  <button
+                    className="btn btn-success"
+                    onClick={onProgressClick}
+                    onKeyDown={e => this.handleButtonKeyDown(e)}
+                    autoFocus={true}>
                     Progres +1
                   </button>
                 }
                 {isGivenUp &&
-                  <button className="btn btn-default"
-                          onClick={onNextClick}
-                          autoFocus={true}>
+                  <button
+                    className="btn btn-default"
+                    onKeyDown={e => this.handleButtonKeyDown(e)}
+                    onClick={onNextClick}
+                    autoFocus={true}>
                     Next
                   </button>
                 }
                 {(isCompleted || isGivenUp) &&
-                  <button className="btn btn-default" onClick={onListenClick}>
+                  <button className={listenBtnClass} onClick={onListenClick}>
                     <span className="glyphicon glyphicon-volume-up">
                     </span>
                   </button>
@@ -120,6 +164,9 @@ const mapStateToProps = createStructuredSelector({
     phrase,
     isGivenUp: createSelector(ui, ui => ui.isGivenUp),
     isCompleted,
+    isLastWord,
+    lastWord,
+    speechSynthIsActive: createSelector(ui, ui => ui.speechSynthIsActive),
 });
 
 

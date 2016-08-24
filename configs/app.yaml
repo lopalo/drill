@@ -10,4 +10,8 @@ session:
     secure: false
 my-dictionary:
     default-repeats: 5
+    datetime-format: "%Y-%m-%d %H:%M"
+training:
+    working-set-size: 10
+    completed-repeat-factor: 0.35
 

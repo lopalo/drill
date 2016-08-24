@@ -2,9 +2,9 @@ import os
 import base64
 import json
 
-import falcon
 import bcrypt
 
+from falcon import before, after, HTTPUnauthorized, HTTPForbidden
 from sqlalchemy.exc import IntegrityError
 
 from models import user
@@ -83,28 +83,27 @@ class AuthMiddleware:
 
 def require_user(req, resp, resource, params):
     if req.context["user"] is None:
-        raise falcon.HTTPUnauthorized("Authentication Required", "", [])
+        raise HTTPUnauthorized("Authentication Required", "", [])
 
 
 def require_admin(req, resp, resource, params):
     require_user(req, resp, resource, params)
     if not req.context["user"].is_admin:
-        raise falcon.HTTPForbidden(
-            "Permission Denied", "User must be an admin")
+        raise HTTPForbidden("Permission Denied", "User must be an admin")
 
 
 class UserHandler(Handler):
 
-    @falcon.before(require_user)
-    @falcon.after(json_response)
+    @before(require_user)
+    @after(json_response)
     def on_get(self, req, resp):
         resp.body = req.context['user'].client_view
 
 
 class LoginHandler(Handler):
 
-    @falcon.before(json_request)
-    @falcon.after(json_response)
+    @before(json_request)
+    @after(json_response)
     def on_post(self, req, resp):
         #TODO: validate args
         body = req.context['body']
@@ -130,15 +129,15 @@ class LoginHandler(Handler):
 
 class LogoutHandler(Handler):
 
-    @falcon.before(require_user)
+    @before(require_user)
     def on_post(self, req, resp):
         req.context['user'].delete_session(self.app_context, resp)
 
 
 class RegisterHandler(Handler):
 
-    @falcon.before(json_request)
-    @falcon.after(json_response)
+    @before(json_request)
+    @after(json_response)
     def on_post(self, req, resp):
         #TODO: validate args
         body = req.context['body']

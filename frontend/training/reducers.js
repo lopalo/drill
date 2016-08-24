@@ -1,6 +1,6 @@
 import {combineReducers} from "redux";
 import initial from "lodash/initial";
-import {updateIn} from "icepick";
+import {updateIn, splice, push} from "icepick";
 
 import * as actions from "./actions";
 
@@ -8,7 +8,7 @@ const initialUiState = {
     phraseIndex: 0,
     completedWords: [],
     isGivenUp: false,
-    activeVoice: null
+    speechSynthIsActive: false
 };
 
 const ui = (state=initialUiState, action) => {
@@ -22,6 +22,8 @@ const ui = (state=initialUiState, action) => {
             return {...state, completedWords: initial(state.completedWords)};
         case actions.PASS_PHRASE:
             return {...initialUiState, phraseIndex: action.nextPhraseIndex};
+        case actions.COMPLETE_PHRASE:
+            return {...initialUiState, phraseIndex: state.phraseIndex};
         case actions.GIVE_UP:
             return {
                 ...state,
@@ -41,6 +43,10 @@ const workingSet = (state=[], action) => {
             let idx = action.phraseIndex;
             return updateIn(state, [idx], p => phrase(p, action));
         }
+        case actions.COMPLETE_PHRASE:
+            return splice(state, action.phraseIndex, 1);
+        case actions.ADD_PHRASE:
+            return push(state, action.phrase);
         default:
             return state;
     }
@@ -49,9 +55,8 @@ const workingSet = (state=[], action) => {
 const phrase = (state, action) => {
     switch (action.type) {
         case actions.PASS_PHRASE: {
-            let {progress, repeats} = state;
-            progress += action.progress;
-            return {...state, progress: Math.min(progress, repeats)};
+            let {progress} = state;
+            return {...state, progress: progress + action.progress};
         }
         default:
             return state;
