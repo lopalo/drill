@@ -12,6 +12,7 @@ import {
 } from "../actions";
 
 import {
+    WORD_STATUS,
     ui,
     wordsStatus,
     isCompleted,
@@ -147,15 +148,27 @@ class TrainingContent extends React.Component {
 }
 
 
-const WordStatus = ({actual, status}) => {
+const WordStatus = ({target, actual, status}) => {
     if (!actual) return null;
-    if (status === "ok") {
-        return <div className="btn btn-info">{actual}</div>;
+    let btnClass = "btn ";
+    switch (status) {
+        case WORD_STATUS.OK:
+            btnClass += "btn-info";
+            break;
+        case WORD_STATUS.WARNING:
+            btnClass += "btn-warning";
+            break;
+        case WORD_STATUS.ERROR:
+            btnClass += "btn-danger";
+            break;
     }
-    if (status === "error") {
-        return <div className="btn btn-danger">{actual}</div>;
-    }
-
+    btnClass += " btn-tooltip";
+    return (
+      <div className={btnClass}>
+        {actual}
+        {target && <span className="btn-tooltip-text">{target}</span>}
+      </div>
+    );
 };
 
 
