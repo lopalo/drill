@@ -15,6 +15,7 @@ const reducer = combineReducers({
         myDictionary,
         dictionary
     }),
+    confirmData: (s=null) => s,
     routing: routerReducer
 });
 

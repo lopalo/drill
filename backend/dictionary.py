@@ -6,13 +6,13 @@ from auth import require_user, require_admin
 from models import phrase, user_phrase
 
 
-def phrase_view(fields):
+def phrase_view(row):
     return {
-        'id': fields.id,
-        'sourceText': fields.source_text,
-        'targetText': fields.target_text,
-        'sourceLang': fields.source_lang,
-        'targetLang': fields.target_lang,
+        'id': row.id,
+        'sourceText': row.source_text,
+        'targetText': row.target_text,
+        'sourceLang': row.source_lang,
+        'targetLang': row.target_lang,
     }
 
 
@@ -69,16 +69,15 @@ class PhraseHandler(Handler):
     @staticmethod
     def _to_db_row(fields):
        return {
-        'source_text': fields['sourceText'],
-        'target_text': fields['targetText'],
-        'source_lang': fields['sourceLang'],
-        'target_lang': fields['targetLang'],
-    }
-
+           'source_text': fields['sourceText'],
+           'target_text': fields['targetText'],
+           'source_lang': fields['sourceLang'],
+           'target_lang': fields['targetLang'],
+       }
 
 
 configure_handlers = make_handlers("/dictionary/", [
     ("list", ListHandler),
     ("phrase/{phrase_id}", PhraseHandler),
-    ("create-phrase", PhraseHandler)
+    ("create-phrase", PhraseHandler),
 ])

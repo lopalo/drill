@@ -8,6 +8,7 @@ import {
 } from "react-router";
 import {connect} from "react-redux";
 
+import Confirm from "./common/components/Confirm";
 import Auth from "./auth/components/Auth";
 import Logout from "./auth/components/Logout";
 import Profile from "./profile/components/Profile";
@@ -54,6 +55,7 @@ class AppComponent extends React.Component {
                 <li className="nav-item"><Logout /></li>
               </ul>
             </div>
+            <Confirm />
             {this.props.children}
           </div>
         );

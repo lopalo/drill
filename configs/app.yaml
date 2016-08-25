@@ -12,6 +12,7 @@ my-dictionary:
     default-repeats: 5
     datetime-format: "%Y-%m-%d %H:%M"
 training:
+    auto-pronounciation: true
     working-set-size: 10
     completed-repeat-factor: 0.35
 

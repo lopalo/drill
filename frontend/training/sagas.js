@@ -1,14 +1,15 @@
-/*global SpeechSyntheisUtterance*/
 import {put, select, cps} from "redux-saga/effects";
 
 import {
     REQUEST_WORKING_SET,
+    COMPLETE_WORD,
     PASS_PHRASE,
     COMPLETE_PHRASE,
     LISTEN,
     addPhrase
 } from "./actions";
-import {phrase} from "./selectors";
+import {profile} from "../common/selectors";
+import {phrase, isCompleted} from "./selectors";
 import {setProperty} from "../common/actions";
 import {
     fetchJSON,
@@ -53,7 +54,18 @@ function* completePhrase() {
 
 
 function* listen() {
-    yield * takeEvery(LISTEN, activateSpeech);
+    yield* takeLatest(LISTEN, activateSpeech);
+}
+
+
+function* autoListen() {
+    yield* takeLatest(COMPLETE_WORD, function* () {
+        let completed = yield select(isCompleted);
+        let prof = yield select(profile);
+        if (completed && prof.autoPronounciation) {
+            yield* activateSpeech();
+        }
+    });
 }
 
 
@@ -80,6 +92,7 @@ export default [
     fetchWorkingSet,
     passPhrase,
     completePhrase,
-    listen
+    listen,
+    autoListen
 ];
 

@@ -4,6 +4,7 @@ import thunkMiddleware from "redux-thunk";
 import createSagaMiddleware from "redux-saga";
 import {routerMiddleware} from "react-router-redux";
 
+import commonSagas from "./common/sagas";
 import authSagas from "./auth/sagas";
 import trainingSagas from "./training/sagas";
 import myDictionarySagas from "./my-dictionary/sagas";
@@ -12,6 +13,7 @@ import dictionarySagas from "./dictionary/sagas";
 
 const configureSagas = sagaMiddleware => {
     let sagas = [
+        ...commonSagas,
         ...authSagas,
         ...trainingSagas,
         ...myDictionarySagas,
@@ -29,7 +31,10 @@ export const configureMiddlewares = history => {
     let onStoreCreated = () => configureSagas(sagaMiddleware);
     middlewares.push(sagaMiddleware);
     if (DEBUG) {
-        middlewares.push(createLogger({collapsed: true}));
+        middlewares.push(createLogger({
+            collapsed: true,
+            actionTransformer: a => ({...a, type: a.type.toString()})
+        }));
     }
     return {middlewares, onStoreCreated};
 };

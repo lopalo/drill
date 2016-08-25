@@ -8,7 +8,11 @@ import {
 } from "./actions";
 import {list} from "./selectors";
 import {setProperty} from "../common/actions";
-import {fetchJSON, takeLatestSafely as takeLatest} from "../common/sagas";
+import {
+    fetchJSON,
+    takeLatestSafely as takeLatest,
+    takeEverySafely as takeEvery
+} from "../common/sagas";
 
 
 function* doFetchList() {
@@ -52,7 +56,7 @@ function* setPhraseRepeats() {
 
 
 function* deletePhrase() {
-    yield* takeLatest(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
+    yield* takeEvery(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
         let url = `/my-dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, null, {method: "DELETE"});
         yield* doFetchList();

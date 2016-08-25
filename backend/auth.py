@@ -15,17 +15,26 @@ class User:
 
     def __init__(self, fields, session_id=None):
         fields = dict(fields)
+        fields.setdefault("profile", {})
         self._fields = fields
         self._session_id = session_id
-        self.__dict__.update(fields)
+
+    def __getattr__(self, name):
+        if name not in self._fields:
+            raise AttributeError
+        return self._fields[name]
 
     @property
     def client_view(self):
         fields = self._fields
+        profile = fields['profile']
         return {
             'name': fields['name'],
             'email': fields['name'],
-            'isAdmin': fields['is_admin']
+            'isAdmin': fields['is_admin'],
+            'profile': {
+                "autoPronounciation": profile["auto_pronounciation"]
+            }
         }
 
     @property
@@ -35,6 +44,11 @@ class User:
     @classmethod
     def from_json(cls, data, session_id=None):
         return cls(json.loads(data.decode("utf-8")), session_id)
+
+    def init_profile(self, app_context):
+        #TODO: fetch profile from db
+        ap = app_context.config['training']['auto-pronounciation']
+        self.profile['auto_pronounciation'] = ap
 
     def create_session(self, app_context, resp):
         sid = self._create_session_id()
@@ -123,6 +137,7 @@ class LoginHandler(Handler):
         if bcrypt.hashpw(password, user_password) != user_password:
             result['error'] = error
             return
+        usr.init_profile(self.app_context)
         usr.create_session(self.app_context, resp)
         result['user'] = usr.client_view
 
@@ -157,6 +172,7 @@ class RegisterHandler(Handler):
                 result['error'] = "E-mail is already used"
                 return
         usr = User(user_record.items())
+        usr.init_profile(self.app_context)
         usr.create_session(self.app_context, resp)
         result['user'] = usr.client_view
 

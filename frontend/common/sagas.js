@@ -1,5 +1,7 @@
 import {takeEvery, takeLatest} from "redux-saga";
-import {call} from "redux-saga/effects";
+import {call, put, take} from "redux-saga/effects";
+
+import {CONFIRM_ACTION, setProperty} from "./actions";
 
 
 export function* fetchJSON(url, body=null, options={}) {
@@ -53,3 +55,22 @@ export function* takeLatestSafely(pattern, saga, ...args) {
         }
     }
 }
+
+
+function* confirmAction() {
+    yield* takeEverySafely(CONFIRM_ACTION, function* ({text, action}) {
+        let yes = Symbol("Yes");
+        let no = Symbol("No");
+        yield put(setProperty("confirmData", {text, yes, no}));
+        let answer = yield take([yes, no]);
+        yield put(setProperty("confirmData", null));
+        if (answer.type === yes) {
+            yield put(action);
+        }
+    });
+}
+
+
+export default [
+    confirmAction
+];

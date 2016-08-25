@@ -12,7 +12,11 @@ import {
     REQUEST_ADD_TO_MY_DICT
 } from "./actions";
 import {setProperty} from "../common/actions";
-import {fetchJSON, takeLatestSafely as takeLatest} from "../common/sagas";
+import {
+    fetchJSON,
+    takeLatestSafely as takeLatest,
+    takeEverySafely as takeEvery,
+} from "../common/sagas";
 
 
 function* doFetchList() {
@@ -36,7 +40,7 @@ function* fetchPhrase() {
 }
 
 function* createPhrase() {
-    yield* takeLatest(REQUEST_CREATE_PHRASE, function* ({data}) {
+    yield* takeEvery(REQUEST_CREATE_PHRASE, function* ({data}) {
         yield* fetchJSON("/dictionary/create-phrase", data, {method: "POST"});
         yield put(push("dictionary"));
         yield* doFetchList();
@@ -45,7 +49,7 @@ function* createPhrase() {
 
 
 function* updatePhrase() {
-    yield* takeLatest(REQUEST_UPDATE_PHRASE, function* ({phraseId, data}) {
+    yield* takeEvery(REQUEST_UPDATE_PHRASE, function* ({phraseId, data}) {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, data, {method: "PUT"});
         yield* doFetchList();
@@ -54,7 +58,7 @@ function* updatePhrase() {
 
 
 function* deletePhrase() {
-    yield* takeLatest(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
+    yield* takeEvery(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, null, {method: "DELETE"});
         yield* doFetchList();
@@ -63,7 +67,7 @@ function* deletePhrase() {
 
 
 function* addPhraseToMyDict() {
-    yield* takeLatest(REQUEST_ADD_TO_MY_DICT, function* ({phraseId}) {
+    yield* takeEvery(REQUEST_ADD_TO_MY_DICT, function* ({phraseId}) {
         let data = {id: phraseId};
         yield* fetchJSON("/my-dictionary/add-phrase", data, {method: "POST"});
         yield* doFetchList();

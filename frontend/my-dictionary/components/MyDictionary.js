@@ -3,13 +3,13 @@ import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import {createStructuredSelector} from "reselect";
 
-import {isAdmin} from "../../common/selectors";
 import {
     requestList,
     setPhraseProgress,
     setPhraseRepeats,
     requestDeletePhrase
 } from "../actions";
+import {confirmAction} from "../../common/actions";
 import {list} from "../selectors";
 
 
@@ -42,7 +42,7 @@ class List extends React.Component {
                   key={row.id} row={row}
                   onProgressChanged={v => onProgressChanged(row.id, idx, v)}
                   onRepeatsChanged={v => onRepeatsChanged(row.id, idx, v)}
-                  onDelete={() => onDelete(row.id)} />
+                  onDelete={() => onDelete(row.sourceText, row.id)} />
               )}
             </tbody>
           </table>
@@ -81,13 +81,18 @@ const ListItem = ({row, onProgressChanged, onRepeatsChanged, onDelete}) => (
 );
 
 
-const mapStateToProps = createStructuredSelector({list, isAdmin});
+const mapStateToProps = createStructuredSelector({list});
+
+const deletePhrase = (sourceText, id) => confirmAction(
+    `Are you sure you want to delete "${sourceText}"?`,
+    requestDeletePhrase(id)
+);
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     onDidMount: requestList,
     onProgressChanged: setPhraseProgress,
     onRepeatsChanged: setPhraseRepeats,
-    onDelete: requestDeletePhrase
+    onDelete: deletePhrase
 }, dispatch);
 
 export default connect(

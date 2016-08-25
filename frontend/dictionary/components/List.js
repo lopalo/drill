@@ -5,6 +5,7 @@ import {connect} from "react-redux";
 import {createStructuredSelector} from "reselect";
 
 import {isAdmin} from "../../common/selectors";
+import {confirmAction} from "../../common/actions";
 import {
     requestList,
     requestDeletePhrase,
@@ -39,7 +40,7 @@ class List extends React.Component {
                   row={row}
                   isAdmin={isAdmin}
                   onAddToMyDict={() => onAddToMyDict(row.id)}
-                  onDelete={() => onDelete(row.id)} />
+                  onDelete={() => onDelete(row.sourceText, row.id)} />
               )}
             </tbody>
           </table>
@@ -81,9 +82,15 @@ const ListItem = ({row, isAdmin, onDelete, onAddToMyDict}) => (
 
 const mapStateToProps = createStructuredSelector({list, isAdmin});
 
+
+const deletePhrase = (sourceText, id) => confirmAction(
+    `Are you sure you want to delete "${sourceText}"?`,
+    requestDeletePhrase(id)
+);
+
 const mapDispatchToProps = dispatch => bindActionCreators({
     onDidMount: requestList,
-    onDelete: requestDeletePhrase,
+    onDelete: deletePhrase,
     onAddToMyDict: requestAddToMyDict,
 }, dispatch);
 
