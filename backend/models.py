@@ -34,18 +34,21 @@ phrase = Table("phrase", metadata,
     Column("target_text", Text, nullable=False),
     Column("source_lang", Language, nullable=False),
     Column("target_lang", Language, nullable=False),
+    Column("added_by_user_id",
+           ForeignKey("phrase.id", onupdate="CASCADE", ondelete="SET NULL"),
+           index=True)
 )
 
 
 grammar_section = Table("grammar_section", metadata,
     Column("id", Integer, primary_key=True),
-    Column("title", Text, nullable=False),
+    Column("title", Text, nullable=False, unique=True),
 )
 
 
 theme = Table("theme", metadata,
     Column("id", Integer, primary_key=True),
-    Column("title", Text, nullable=False),
+    Column("title", Text, nullable=False, unique=True),
 )
 
 

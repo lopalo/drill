@@ -17,6 +17,3 @@ export const confirmAction = (text, action) => ({
 
 
 
-export const empty = () => ({type: null});
-
-

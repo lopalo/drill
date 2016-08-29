@@ -11,7 +11,6 @@ import {
     requestCreatePhrase,
     requestUpdatePhrase
 } from "../actions";
-import {empty} from "../../common/actions";
 import FormGroup from "../../common/components/FormGroup";
 
 
@@ -59,6 +58,8 @@ const EditForm = ({params: {phraseId}, onClose, onSubmit}) => (
                 <option value="en">en</option>
               </select>
             </FormGroup>
+            //TODO: show targetLang and sourceLang read-only
+            //TODO: fields for group editing
 
 
           </div>
@@ -78,7 +79,9 @@ const EditForm = ({params: {phraseId}, onClose, onSubmit}) => (
 
 class PhraseEditor extends React.Component {
     componentDidMount() {
-        this.props.onDidMount();
+        if (this.props.onDidMount) {
+            this.props.onDidMount();
+        }
     }
     componentWillUnmount() {
         this.props.onWillUnmount();
@@ -96,7 +99,7 @@ const mapDispatchToProps = (
     {params: {phraseId}}
 ) => bindActionCreators({
     onClose: () => push("dictionary"),
-    onDidMount: phraseId ? requestPhrase(phraseId) : empty,
+    onDidMount: phraseId ? requestPhrase(phraseId) : null,
     onWillUnmount: () => formActions.reset(model),
     onSubmit: phraseId ? requestUpdatePhrase(phraseId) : requestCreatePhrase
 }, dispatch);

@@ -6,57 +6,43 @@ import {createStructuredSelector} from "reselect";
 
 import {isAdmin} from "../../common/selectors";
 import {confirmAction} from "../../common/actions";
-import {
-    requestList,
-    requestDeletePhrase,
-    requestAddToMyDict
-} from "../actions";
+import {requestDeletePhrase, requestAddToMyDict} from "../actions";
 import {list} from "../selectors";
 
 
-class List extends React.Component {
-    componentDidMount() {
-        this.props.onDidMount();
-    }
-    render() {
-        let {list, isAdmin, onAddToMyDict, onDelete} = this.props;
-        return (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Source Text</th>
-                <th>Target Text</th>
-                <th>Source Lang</th>
-                <th>Target Lang</th>
-                <th>Add To My Dictionary</th>
-                {isAdmin && <th>Edit</th>}
-                {isAdmin && <th>Delete</th>}
-              </tr>
-            </thead>
-            <tbody>
-              {list.map(row =>
-                <ListItem
-                  key={row.id}
-                  row={row}
-                  isAdmin={isAdmin}
-                  onAddToMyDict={() => onAddToMyDict(row.id)}
-                  onDelete={() => onDelete(row.sourceText, row.id)} />
-              )}
-            </tbody>
-          </table>
-        );
-    }
-}
+const List = ({list, isAdmin, onAddToMyDict, onDelete}) => (
+  <table className="table">
+    <thead>
+      <tr>
+        <th>Source Text</th>
+        <th>Target Text</th>
+        <th>Added By</th>
+        <th>Add To My Dictionary</th>
+        {isAdmin && <th>Edit</th>}
+        {isAdmin && <th>Delete</th>}
+      </tr>
+    </thead>
+    <tbody>
+      {list.map(row =>
+        <ListItem
+          key={row.id}
+          row={row}
+          isAdmin={isAdmin}
+          onAddToMyDict={() => onAddToMyDict(row.id)}
+          onDelete={() => onDelete(row.sourceText, row.id)} />
+      )}
+    </tbody>
+  </table>
+);
 
 
 const ListItem = ({row, isAdmin, onDelete, onAddToMyDict}) => (
   <tr>
     <td>{row.sourceText}</td>
     <td>{row.targetText}</td>
-    <td>{row.sourceLang}</td>
-    <td>{row.targetLang}</td>
+    <td>{row.addedBy}</td>
     <td className="col-md-1">
-      {!row.isAdded &&
+      {!row.isInMyDict &&
         <button className="btn btn-default" onClick={onAddToMyDict}>
           <span className="glyphicon glyphicon-plus"></span>
         </button>
@@ -89,7 +75,6 @@ const deletePhrase = (sourceText, id) => confirmAction(
 );
 
 const mapDispatchToProps = dispatch => bindActionCreators({
-    onDidMount: requestList,
     onDelete: deletePhrase,
     onAddToMyDict: requestAddToMyDict,
 }, dispatch);

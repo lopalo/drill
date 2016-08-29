@@ -1,6 +1,5 @@
 from falcon import before, after
 from sqlalchemy import Float, select, and_, cast
-from sqlalchemy.sql import func
 
 from utils import Handler, json_response, json_request, make_handlers
 from auth import require_user
@@ -24,14 +23,14 @@ def phrase_view(time_format):
 
 
 def select_expression(user_id):
-    p = phrase.c
+    pc = phrase.c
     upc = user_phrase.c
 
     columns = [
-        p.id, p.source_text, p.target_text,
+        pc.id, pc.source_text, pc.target_text,
         upc.completion_time, upc.repeats, upc.progress
     ]
-    joined = user_phrase.join(phrase, upc.phrase_id == p.id)
+    joined = user_phrase.join(phrase, upc.phrase_id == pc.id)
     sel = (
         select(columns).select_from(joined).
         where(upc.user_id == user_id).

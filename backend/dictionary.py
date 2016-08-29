@@ -3,7 +3,8 @@ from sqlalchemy import select, exists, and_
 
 from utils import Handler, json_response, json_request, make_handlers
 from auth import require_user, require_admin
-from models import phrase, user_phrase
+from models import phrase, user_phrase, user
+from dictionary_groups import GrammarSectionsHandler, ThemesHandler
 
 
 def phrase_view(row):
@@ -11,14 +12,22 @@ def phrase_view(row):
         'id': row.id,
         'sourceText': row.source_text,
         'targetText': row.target_text,
-        'sourceLang': row.source_lang,
-        'targetLang': row.target_lang,
     }
 
 
 def phrase_list_view(row):
     res = phrase_view(row)
-    res['isAdded'] = row.is_added
+    res['isInMyDict'] = row.is_in_my_dict
+    res['addedBy'] = row.added_by
+    return res
+
+
+def phrase_editor_view(row):
+    res = phrase_view(row)
+    res['sourceLang'] = row.source_lang
+    res['targetLang'] = row.target_lang
+    res['grammarSections'] = [] #TODO: row.grammarSections
+    res['themes'] = [] #TODO: row.grammarSections
     return res
 
 
@@ -28,15 +37,26 @@ class ListHandler(Handler):
     @after(json_response)
     def on_get(self, req, resp):
         user_id = req.context['user'].id
-        is_added = (
+        is_in_my_dict = (
             exists().
             where(and_(
                 user_phrase.c.user_id == user_id,
                 user_phrase.c.phrase_id == phrase.c.id
             )).
-            label("is_added")
+            label("is_in_my_dict")
         )
-        sel = select(phrase.c + [is_added]).order_by(phrase.c.id.desc())
+        joined = phrase.join(
+            user,
+            phrase.c.added_by_user_id == user.c.id,
+            isouter=True
+        )
+        columns = []
+        columns.extend(phrase.c)
+        columns.extend([
+            is_in_my_dict,
+            user.c.name.label("added_by")
+        ])
+        sel = select(columns).select_from(joined).order_by(phrase.c.id.desc())
         rows = self.db.execute(sel).fetchall()
         resp.body = list(map(phrase_list_view, rows))
 
@@ -46,11 +66,13 @@ class PhraseHandler(Handler):
     @after(json_response)
     def on_get(self, req, resp, phrase_id):
         sel = phrase.select().where(phrase.c.id == phrase_id)
-        resp.body = phrase_view(self.db.execute(sel).fetchone())
+        resp.body = phrase_editor_view(self.db.execute(sel).fetchone())
 
     @before(json_request)
     def on_post(self, req, resp):
-        ins = phrase.insert().values(**self._to_db_row(req.context['body']))
+        row = self._to_db_row(req.context['body'])
+        row['added_by_user_id'] = req.context['user'].id
+        ins = phrase.insert().values(**row)
         self.db.execute(ins)
 
     @before(json_request)
@@ -80,4 +102,7 @@ configure_handlers = make_handlers("/dictionary/", [
     ("list", ListHandler),
     ("phrase/{phrase_id}", PhraseHandler),
     ("create-phrase", PhraseHandler),
+
+    ("grammar-sections", GrammarSectionsHandler),
+    ("themes", ThemesHandler),
 ])
