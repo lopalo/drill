@@ -33,7 +33,7 @@ class User:
             'email': fields['name'],
             'isAdmin': fields['is_admin'],
             'profile': {
-                "autoPronounciation": profile["auto_pronounciation"]
+                "autoSpeak": profile["auto_speak"]
             }
         }
 
@@ -47,8 +47,8 @@ class User:
 
     def init_profile(self, app_context):
         #TODO: fetch profile from db
-        ap = app_context.config['training']['auto-pronounciation']
-        self.profile['auto_pronounciation'] = ap
+        ap = app_context.config['training']['auto-speak']
+        self.profile['auto_speak'] = ap
 
     def create_session(self, app_context, resp):
         sid = self._create_session_id()
@@ -59,6 +59,7 @@ class User:
             "session_id", sid,
             max_age=duration,
             path="/",
+            http_only=False,
             secure=config['secure'])
         app_context.redis.set(sid, self.as_json, ex=duration)
 
@@ -92,6 +93,7 @@ class AuthMiddleware:
             "session_id", sid,
             max_age=duration,
             path="/",
+            http_only=False,
             secure=config['secure'])
 
 

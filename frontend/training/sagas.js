@@ -5,7 +5,7 @@ import {
     COMPLETE_WORD,
     PASS_PHRASE,
     COMPLETE_PHRASE,
-    LISTEN,
+    SPEAK,
     addPhrase
 } from "./actions";
 import {profile} from "../common/selectors";
@@ -48,21 +48,22 @@ function* completePhrase() {
         yield* cancelSpeech();
         let url = "/training/working-set";
         let newPhrase = yield* fetchJSON(url, {id}, {method: "POST"});
+        if (!newPhrase) return;
         yield put(addPhrase(newPhrase));
     });
 }
 
 
-function* listen() {
-    yield* takeLatest(LISTEN, activateSpeech);
+function* speak() {
+    yield* takeLatest(SPEAK, activateSpeech);
 }
 
 
-function* autoListen() {
+function* autoSpeak() {
     yield* takeLatest(COMPLETE_WORD, function* () {
         let completed = yield select(isCompleted);
         let prof = yield select(profile);
-        if (completed && prof.autoPronounciation) {
+        if (completed && prof.autoSpeak) {
             yield* activateSpeech();
         }
     });
@@ -75,15 +76,15 @@ function* activateSpeech() {
     let utterance = new SpeechSynthesisUtterance(targetText);
     utterance.voice = getVoice();
     synth.speak(utterance);
-    yield put(setProperty("pages.training.ui.speechSynthIsActive", true));
+    yield put(setProperty("pages.training.ui.speechIsActive", true));
     yield cps(cb => {utterance.onend = () => cb(null, true);});
-    yield put(setProperty("pages.training.ui.speechSynthIsActive", false));
+    yield put(setProperty("pages.training.ui.speechIsActive", false));
 }
 
 
 function* cancelSpeech() {
     synth.cancel();
-    yield put(setProperty("pages.training.ui.speechSynthIsActive", false));
+    yield put(setProperty("pages.training.ui.speechIsActive", false));
 }
 
 
@@ -92,7 +93,7 @@ export default [
     fetchWorkingSet,
     passPhrase,
     completePhrase,
-    listen,
-    autoListen
+    speak,
+    autoSpeak,
 ];
 

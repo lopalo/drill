@@ -99,9 +99,10 @@ const mapDispatchToProps = (
     {params: {phraseId}}
 ) => bindActionCreators({
     onClose: () => push("dictionary"),
-    onDidMount: phraseId ? requestPhrase(phraseId) : null,
+    onDidMount: phraseId ? () => requestPhrase(phraseId) : null,
     onWillUnmount: () => formActions.reset(model),
-    onSubmit: phraseId ? requestUpdatePhrase(phraseId) : requestCreatePhrase
+    onSubmit: phraseId ?
+        data => requestUpdatePhrase(phraseId, data) : requestCreatePhrase
 }, dispatch);
 
 export default connect(

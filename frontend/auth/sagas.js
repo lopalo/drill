@@ -1,4 +1,5 @@
-import {put} from "redux-saga/effects";
+import {delay} from "redux-saga";
+import {put, select} from "redux-saga/effects";
 import {actions as formActions} from "react-redux-form";
 
 import {setProperty} from "../common/actions";
@@ -61,10 +62,23 @@ function* logout() {
 }
 
 
+function* checkSession() {
+    let isLoggedIn;
+    while (true) {
+        yield delay(1000);
+        isLoggedIn = yield select(s => s.user !== null);
+        if (isLoggedIn && !document.cookie.includes("session_id")) {
+            location.reload();
+        }
+    }
+}
+
+
 export default [
     fetchUser,
     login,
     register,
-    logout
+    logout,
+    checkSession
 ];
 

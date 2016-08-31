@@ -8,7 +8,7 @@ const initialUiState = {
     phraseIndex: 0,
     completedWords: [],
     isGivenUp: false,
-    speechSynthIsActive: false
+    speechIsActive: false
 };
 
 const ui = (state=initialUiState, action) => {

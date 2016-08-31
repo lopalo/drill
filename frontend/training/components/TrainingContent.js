@@ -8,7 +8,7 @@ import {
     deleteCompletedWord,
     passPhrase,
     giveUp,
-    listen
+    speak
 } from "../actions";
 
 import {
@@ -59,7 +59,7 @@ class TrainingContent extends React.Component {
     }
     handleButtonKeyDown(event) {
         if (event.keyCode === 76) {
-            this.props.onListenClick();
+            this.props.onSpeakClick();
         }
     }
     render() {
@@ -68,12 +68,12 @@ class TrainingContent extends React.Component {
             isGivenUp,
             isCompleted,
             wordsStatus,
-            speechSynthIsActive,
+            speechIsActive,
 
             onProgressClick,
             onNextClick,
             onGiveUpClick,
-            onListenClick
+            onSpeakClick
         } = this.props;
         let progress = phrase.progress / phrase.repeats * 100;
         let barClass = "progress-bar ";
@@ -82,9 +82,9 @@ class TrainingContent extends React.Component {
         } else {
             barClass += "progress-bar-info";
         }
-        let listenBtnClass = "btn btn-default";
-        if (speechSynthIsActive) {
-            listenBtnClass += " active";
+        let speakBtnClass = "btn btn-default";
+        if (speechIsActive) {
+            speakBtnClass += " active";
         }
         return (
           <div className="panel panel-default">
@@ -135,7 +135,7 @@ class TrainingContent extends React.Component {
                   </button>
                 }
                 {(isCompleted || isGivenUp) &&
-                  <button className={listenBtnClass} onClick={onListenClick}>
+                  <button className={speakBtnClass} onClick={onSpeakClick}>
                     <span className="glyphicon glyphicon-volume-up">
                     </span>
                   </button>
@@ -179,17 +179,17 @@ const mapStateToProps = createStructuredSelector({
     isCompleted,
     isLastWord,
     lastWord,
-    speechSynthIsActive: createSelector(ui, ui => ui.speechSynthIsActive),
+    speechIsActive: createSelector(ui, ui => ui.speechIsActive),
 });
 
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     onWordCompleted: completeWord,
     onWordDeleted: deleteCompletedWord,
-    onProgressClick: passPhrase(1),
-    onNextClick: passPhrase(0),
+    onProgressClick: () => passPhrase(1),
+    onNextClick: () => passPhrase(0),
     onGiveUpClick: giveUp,
-    onListenClick: listen,
+    onSpeakClick: speak,
 }, dispatch);
 
 

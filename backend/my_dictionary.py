@@ -83,6 +83,8 @@ class PhraseHandler(Handler):
             upd = upd.values(progress=body['progress'])
         if "repeats" in body:
             upd = upd.values(repeats=body['repeats'])
+        if "completionTime" in body:
+            upd = upd.values(completion_time=body['completionTime'])
         self.db.execute(upd)
 
     def on_delete(self, req, resp, phrase_id):

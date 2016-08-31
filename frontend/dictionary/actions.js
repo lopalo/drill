@@ -47,7 +47,7 @@ export const requestDeleteTheme = themeId => ({
     themeId
 });
 
-export const requestPhrase = phraseId => () => ({
+export const requestPhrase = phraseId => ({
     type: REQUEST_PHRASE,
     phraseId
 });
@@ -59,7 +59,7 @@ export const requestCreatePhrase = data => ({
 });
 
 
-export const requestUpdatePhrase = phraseId => data => ({
+export const requestUpdatePhrase = (phraseId, data) => ({
     type: REQUEST_UPDATE_PHRASE,
     phraseId,
     data

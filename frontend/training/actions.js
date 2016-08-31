@@ -14,7 +14,7 @@ export const DELETE_COMPLETED_WORD = "training/DELETE_COMPLETED_WORD";
 export const PASS_PHRASE = "training/PASS_PHRASE";
 export const COMPLETE_PHRASE = "training/COMPLETE_PHRASE";
 export const GIVE_UP = "training/GIVE_UP";
-export const LISTEN = "training/LISTEN";
+export const SPEAK = "training/SPEAK";
 
 
 export const requestWorkingSet = () => ({type: REQUEST_WORKING_SET});
@@ -35,7 +35,7 @@ export const completeWord = word => ({
 export const deleteCompletedWord = () => ({type: DELETE_COMPLETED_WORD});
 
 
-export const passPhrase = progress => () => (dispatch, getState) => {
+export const passPhrase = progress => (dispatch, getState) => {
     let state = getState();
     let p = phrase(state);
     if (p.progress + progress >= p.repeats) {
@@ -63,4 +63,4 @@ export const giveUp = () => (dispatch, getState) => {
 };
 
 
-export const listen = () => ({type: LISTEN});
+export const speak = () => ({type: SPEAK});

@@ -66,6 +66,8 @@ class WorkingSetHandler(Handler):
         with self.db.begin() as conn:
             conn.execute(upd)
             new_phrase = conn.execute(sel).fetchone()
+        if new_phrase is None:
+            return
         dt_format = self.app_context.config['my-dictionary']['datetime-format']
         resp.body = self.convert_phrase_view(phrase_view(dt_format)(new_phrase))
 
