@@ -3,8 +3,9 @@ import {connect} from "react-redux";
 import {Field, Errors, utils} from "react-redux-form";
 
 
-const FormGroup = ({model, errorMessages={}, field, children}) => (
+const FormGroup = ({model, errorMessages={}, field, children, parser}) => (
   <Field model={model}
+    parser={parser}
     className={"form-group " + (
         !field.valid && field.touched && !field.focus ? "has-error" : ""
     )}>

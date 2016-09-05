@@ -25,7 +25,7 @@ var config = {
             "transform-object-rest-spread"
         ]
     },
-    devtool: "source-map",
+    devtool: DEV ? "eval-source-map" : "source-map",
     plugins: [
         new webpack.DefinePlugin({
             DEBUG: DEV

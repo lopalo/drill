@@ -19,7 +19,8 @@ def configure_app(config_path=None):
     config = get_config(config_path)
     db_engine = sqlalchemy.create_engine(
         config['db']['url'],
-        client_encoding="utf8")
+        client_encoding="utf8",
+        echo=config['db']['echo'])
     redis = StrictRedis(**config['redis'])
     app_context = AppContext(config, db_engine, redis)
     app = falcon.API(middleware=[AuthMiddleware(app_context)])

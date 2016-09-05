@@ -17,7 +17,6 @@ const passwordsMatch = ({password, confirmPassword}) => (
 );
 
 
-
 const Register = ({serverError, onSubmit}) => (
   <div className="panel panel-info">
     <div className="panel-heading">

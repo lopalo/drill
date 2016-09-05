@@ -1,27 +1,51 @@
 import React from "react";
 import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
-import {Form} from "react-redux-form";
+import {Form, Errors, utils} from "react-redux-form";
 import {push} from "react-router-redux";
 import {actions as formActions} from "react-redux-form";
 import omit from "lodash/omit";
+import get from "lodash/get";
+import validator from "validator";
 
 import {
     requestPhrase,
     requestCreatePhrase,
     requestUpdatePhrase
 } from "../actions";
+import {themeList, grammarSectionList} from "../selectors";
 import FormGroup from "../../common/components/FormGroup";
 
+
+const textDifference = ({sourceText, targetText}) => sourceText !== targetText;
+
+const intList = l => l.map(i => parseInt(i));
 
 const model = "pages.dictionary.phrase";
 const field = fieldName => `${model}.${fieldName}`;
 
-const EditForm = ({params: {phraseId}, onClose, onSubmit}) => (
+const EditForm = ({
+    params: {phraseId},
+    onClose,
+    onSubmit,
+    submitted,
+    themes,
+    grammarSections
+}) => (
   <div className="modal" style={{display: "initial"}}>
     <div className="modal-dialog">
       <div className="modal-content">
-        <Form model={model} onSubmit={onSubmit}>
+        <Form model={model} onSubmit={onSubmit}
+          validators={{
+              "": {textDifference},
+              sourceText: {
+                  length: v => validator.isLength(v, {min: 3})
+              },
+              targetText: {
+                  length: v => validator.isLength(v, {min: 3})
+              },
+          }}>
+
           <div className="modal-header">
             <button type="button" className="close" onClick={onClose}>
               &times;
@@ -32,43 +56,65 @@ const EditForm = ({params: {phraseId}, onClose, onSubmit}) => (
           </div>
           <div className="modal-body">
 
-            <FormGroup model={field("sourceText")}>
+          <Errors model={model}
+            wrapper={props => <p className="text-danger">{props.children}</p>}
+            show={{submitFailed: true}}
+            messages={{
+                textDifference: "Target and source texts are equal"
+            }} />
+
+            <FormGroup model={field("sourceText")}
+                       errorMessages={{length: "Too short text"}}>
               <label className="control-label">Source Text</label>
               <input type="text" className="form-control" />
             </FormGroup>
 
-            <FormGroup model={field("targetText")}>
+            <FormGroup model={field("targetText")}
+                       errorMessages={{length: "Too short text"}}>
               <label className="control-label">Target Text</label>
               <input type="text" className="form-control" />
             </FormGroup>
 
             <FormGroup model={field("sourceLang")}>
               <label className="control-label">Source Lang</label>
-              <select className="form-control">
-                <option value="ru">ru</option>
-                <option value="en">en</option>
-              </select>
+              <input type="text" className="form-control" readOnly />
             </FormGroup>
-
 
             <FormGroup model={field("targetLang")}>
               <label className="control-label">Target Lang</label>
-              <select className="form-control">
-                <option value="ru">ru</option>
-                <option value="en">en</option>
+              <input type="text" className="form-control" readOnly />
+            </FormGroup>
+
+            <FormGroup model={field("grammarSections")} parser={intList}>
+              <label className="control-label">Grammar Sections</label>
+              <select multiple className="form-control">
+                {grammarSections.map(i => (
+                  <option key={i.id} value={i.id}>{i.title}</option>
+                ))}
               </select>
             </FormGroup>
-            //TODO: show targetLang and sourceLang read-only
-            //TODO: fields for group editing
 
+            <FormGroup model={field("themes")} parser={intList}>
+              <label className="control-label">Themes</label>
+              <select multiple className="form-control">
+                {themes.map(i => (
+                  <option key={i.id} value={i.id}>{i.title}</option>
+                ))}
+              </select>
+            </FormGroup>
 
           </div>
           <div className="modal-footer">
-            <button type="button" className="btn btn-default" onClick={onClose}>
-              Close
-            </button>
+            <span className={"text-success" + (
+                             submitted ? "" : " disappearing")} >
+              The changes have been saved
+              &nbsp; &nbsp;
+            </span>
             <button type="submit" className="btn btn-primary">
               Save changes
+            </button>
+            <button type="button" className="btn btn-default" onClick={onClose}>
+              Close
             </button>
           </div>
         </Form>
@@ -93,6 +139,13 @@ class PhraseEditor extends React.Component {
 }
 
 
+const mapStateToProps = state => ({
+    themes: themeList(state),
+    grammarSections: grammarSectionList(state),
+    form: utils.getForm(state, model),
+    data: get(state, model)
+});
+
 
 const mapDispatchToProps = (
     dispatch,
@@ -106,7 +159,7 @@ const mapDispatchToProps = (
 }, dispatch);
 
 export default connect(
-    null,
+    mapStateToProps,
     mapDispatchToProps
 )(PhraseEditor);
 

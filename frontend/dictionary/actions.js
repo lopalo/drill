@@ -1,9 +1,6 @@
 
 
-export const REQUEST_LIST = "dictionary/REQUEST_LIST";
-export const REQUEST_THEMES = "dictionary/REQUEST_THEMES";
-export const REQUEST_GRAMMAR_SECTIONS = "dictionary/REQUEST_GRAMMAR_SECTIONS";
-
+export const REQUEST_PAGE_DATA = "dictionary/REQUEST_PAGE_DATA";
 
 export const REQUEST_CREATE_GRAMMAR_SECTION = (
     "dictionary/REQUEST_CREATE_GRAMMAR_SECTION"
@@ -22,9 +19,10 @@ export const REQUEST_DELETE_PHRASE = "dictionary/REQUEST_DELETE_PHRASE";
 export const REQUEST_ADD_TO_MY_DICT = "dictionary/REQUEST_ADD_TO_MY_DICT";
 
 
-export const requestList = () => ({type: REQUEST_LIST});
-export const requestThemes = () => ({type: REQUEST_THEMES});
-export const requestGrammarSections = () => ({type: REQUEST_GRAMMAR_SECTIONS});
+export const SET_FILTER = "dictionary/SET_FILTER";
+
+
+export const requestPageData = () => ({type: REQUEST_PAGE_DATA});
 
 
 export const requestCreateGrammarSection = title => ({
@@ -75,5 +73,12 @@ export const requestDeletePhrase = phraseId => ({
 export const requestAddToMyDict = phraseId => ({
     type: REQUEST_ADD_TO_MY_DICT,
     phraseId
+});
+
+
+export const setFilter = (fieldName, value) => ({
+    type: SET_FILTER,
+    fieldName,
+    value
 });
 

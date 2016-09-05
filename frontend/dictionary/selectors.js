@@ -4,6 +4,8 @@ import {createSelector as create} from "reselect";
 
 const dictionary = state => state.pages.dictionary;
 
+const filters = create(dictionary, dictionary => dictionary.filters);
+
 const data = create(dictionary, dictionary => dictionary.data);
 
 const list = create(data, data => data.list);
@@ -23,9 +25,10 @@ const themeList = create(
 );
 
 export {
+    filters,
     list,
     grammarSections,
     grammarSectionList,
     themes,
-    themeList
+    themeList,
 };

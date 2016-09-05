@@ -1,12 +1,11 @@
-import {put} from "redux-saga/effects";
+import {delay} from "redux-saga";
+import {put, select, take, spawn, fork} from "redux-saga/effects";
 import {push} from "react-router-redux";
 import {actions as formActions} from "react-redux-form";
 
 
 import {
-    REQUEST_LIST,
-    REQUEST_THEMES,
-    REQUEST_GRAMMAR_SECTIONS,
+    REQUEST_PAGE_DATA,
 
     REQUEST_CREATE_GRAMMAR_SECTION,
     REQUEST_DELETE_GRAMMAR_SECTION,
@@ -18,8 +17,12 @@ import {
     REQUEST_CREATE_PHRASE,
     REQUEST_UPDATE_PHRASE,
     REQUEST_DELETE_PHRASE,
-    REQUEST_ADD_TO_MY_DICT
+
+    REQUEST_ADD_TO_MY_DICT,
+    SET_FILTER
+
 } from "./actions";
+import {filters} from "./selectors";
 import {setProperty} from "../common/actions";
 import {
     fetchJSON,
@@ -29,30 +32,53 @@ import {
 
 
 function* doFetchList() {
-    //TODO: yield select(listFilters)
-    let list = yield* fetchJSON("/dictionary/list");
+    let fs = yield select(filters);
+    let url = `/dictionary/list?target-language=${fs.targetLanguage}`;
+    if (fs.grammarSection !== null) {
+        url += `&grammar-section=${fs.grammarSection}`;
+    }
+    if (fs.theme !== null) {
+        url += `&theme=${fs.theme}`;
+    }
+    if (fs.text) {
+        url += `&text=${fs.text}`;
+    }
+    let list = yield* fetchJSON(url);
     yield put(setProperty("pages.dictionary.data.list", list));
 }
 
-function* fetchList() {
-    yield* takeLatest(REQUEST_LIST, doFetchList);
+function* monitorFilters() {
+    let task = null;
+    function* fetch() {
+        yield delay(500);
+        yield* doFetchList();
+    }
+    while (true) {
+        yield take(SET_FILTER);
+        if (task !== null) {
+            task.cancel();
+        }
+        task = yield spawn(fetch);
+    }
+
 }
 
-
-function* fetchThemes() {
-    yield* takeLatest(REQUEST_THEMES, function* () {
+function* doFetchPageData() {
+    yield fork(doFetchList);
+    yield fork(function* () {
         let themes = yield* fetchJSON("/dictionary/themes");
         yield put(setProperty("pages.dictionary.data.themes", themes));
     });
-}
-
-
-function* fetchGrammarSections() {
-    yield* takeLatest(REQUEST_GRAMMAR_SECTIONS, function* () {
+    yield fork(function* () {
         let gs = yield* fetchJSON("/dictionary/grammar-sections");
         yield put(setProperty("pages.dictionary.data.grammarSections", gs));
     });
 }
+
+function* fetchPageData() {
+    yield* takeLatest(REQUEST_PAGE_DATA, doFetchPageData);
+}
+
 
 function* createTheme() {
     yield* takeEvery(REQUEST_CREATE_THEME, function* ({title}) {
@@ -95,18 +121,21 @@ function* deleteGrammarSection() {
 
 const phraseFormModel = "pages.dictionary.phrase";
 
+
+function* doFetchPhrase({phraseId}) {
+    let phrase = yield* fetchJSON(`/dictionary/phrase/${phraseId}`);
+    yield put(formActions.load(phraseFormModel, phrase));
+}
+
 function* fetchPhrase() {
-    yield* takeLatest(REQUEST_PHRASE, function* ({phraseId}) {
-        let phrase = yield* fetchJSON(`/dictionary/phrase/${phraseId}`);
-        yield put(formActions.load(phraseFormModel, phrase));
-    });
+    yield* takeLatest(REQUEST_PHRASE, doFetchPhrase);
 }
 
 function* createPhrase() {
     yield* takeEvery(REQUEST_CREATE_PHRASE, function* ({data}) {
         yield* fetchJSON("/dictionary/create-phrase", data, {method: "POST"});
         yield put(push("dictionary"));
-        yield* doFetchList();
+        yield* doFetchPageData();
     });
 }
 
@@ -115,7 +144,10 @@ function* updatePhrase() {
     yield* takeEvery(REQUEST_UPDATE_PHRASE, function* ({phraseId, data}) {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, data, {method: "PUT"});
-        yield* doFetchList();
+        yield put(formActions.setSubmitted(phraseFormModel, true));
+        yield* doFetchPageData();
+        yield* doFetchPhrase({phraseId});
+        yield put(formActions.setInitial(phraseFormModel));
     });
 }
 
@@ -124,7 +156,7 @@ function* deletePhrase() {
     yield* takeEvery(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, null, {method: "DELETE"});
-        yield* doFetchList();
+        yield* doFetchPageData();
     });
 }
 
@@ -139,14 +171,14 @@ function* addPhraseToMyDict() {
 
 
 export default [
-    fetchList,
-    fetchThemes,
-    fetchGrammarSections,
+    fetchPageData,
     fetchPhrase,
     createPhrase,
     updatePhrase,
     deletePhrase,
     addPhraseToMyDict,
+    monitorFilters,
+
     createTheme,
     deleteTheme,
     createGrammarSection,
