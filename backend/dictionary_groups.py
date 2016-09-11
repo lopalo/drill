@@ -1,3 +1,5 @@
+import json
+
 from falcon import before, after
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -15,8 +17,33 @@ def item_view(row):
     }
 
 
+class GroupHandler(Handler):
+
+    @property
+    def key(self):
+        raise NotImplementedError
+
+    def invalidate_cache(self):
+        self.app_context.redis.delete(self.key)
+
+    def on_get(self, req, resp):
+        redis = self.app_context.redis
+        data = redis.get(self.key)
+        if data is not None:
+            resp.body = json.loads(data.decode("utf-8"))
+            return
+        groups = self._get()
+        redis.set(self.key, json.dumps(groups).encode("utf-8"))
+        resp.body = groups
+
+    def _get(self):
+        raise NotImplementedError
+
+
 @after(json_response)
-class GrammarSectionsHandler(Handler):
+class GrammarSectionsHandler(GroupHandler):
+
+    key = "grammar_sections"
 
     def _get(self):
         gsc = grammar_section.c
@@ -42,16 +69,13 @@ class GrammarSectionsHandler(Handler):
         )
         return {r.id: item_view(r) for r in self.db.execute(sel).fetchall()}
 
-    def on_get(self, req, resp):
-        resp.body = self._get()
-
     @before(require_admin)
     @before(json_request)
     def on_post(self, req, resp):
         body = req.context['body']
         action = body['action']
         if action == "create":
-            expr = grammar_section.insert().values(title=body['title'])
+            expr = grammar_section.insert().values(title=body['title'].strip())
         elif action == "delete":
             expr = (
                 grammar_section.delete().
@@ -61,13 +85,16 @@ class GrammarSectionsHandler(Handler):
             return
         try:
             self.db.execute(expr)
+            self.invalidate_cache()
         except IntegrityError:
             pass
         resp.body = self._get()
 
 
 @after(json_response)
-class ThemesHandler(Handler):
+class ThemesHandler(GroupHandler):
+
+    key = "themes"
 
     def _get(self):
         tc = theme.c
@@ -93,22 +120,20 @@ class ThemesHandler(Handler):
         )
         return {r.id: item_view(r) for r in self.db.execute(sel).fetchall()}
 
-    def on_get(self, req, resp):
-        resp.body = self._get()
-
     @before(require_admin)
     @before(json_request)
     def on_post(self, req, resp):
         body = req.context['body']
         action = body['action']
         if action == "create":
-            expr = theme.insert().values(title=body['title'])
+            expr = theme.insert().values(title=body['title'].strip())
         elif action == "delete":
             expr = theme.delete().where(theme.c.id == body['id'])
         else:
             return
         try:
             self.db.execute(expr)
+            self.invalidate_cache()
         except IntegrityError:
             pass
         resp.body = self._get()

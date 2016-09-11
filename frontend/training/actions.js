@@ -47,6 +47,7 @@ export const passPhrase = progress => (dispatch, getState) => {
     } else {
         dispatch({
             type: PASS_PHRASE,
+            phraseId: p.id,
             phraseIndex: phraseIndex(state),
             nextPhraseIndex: nextPhraseIndex(state),
             progress: progress

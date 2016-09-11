@@ -33,11 +33,10 @@ function* fetchWorkingSet() {
 
 
 function* passPhrase() {
-    yield* takeEvery(PASS_PHRASE, function* ({progress}) {
+    yield* takeEvery(PASS_PHRASE, function* ({progress, phraseId: id}) {
         yield* cancelSpeech();
-        let {id, completionTime} = yield select(phrase);
         let url = "/training/increment-progress";
-        if (!progress || completionTime !== null) return;
+        if (!progress) return;
         yield* fetchJSON(url, {id, progress}, {method: "POST"});
     });
 }

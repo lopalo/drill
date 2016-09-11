@@ -143,8 +143,10 @@ class PhraseHandler(Handler):
             {'section_id': theme_id, 'phrase_id': phrase_id}
             for theme_id in body['grammarSections']])
         with self.db.begin() as conn:
-            conn.execute(themes_ins);
-            conn.execute(sections_ins);
+            if body['themes']:
+                conn.execute(themes_ins);
+            if body['grammarSections']:
+                conn.execute(sections_ins);
 
     @before(json_request)
     def on_put(self, req, resp, phrase_id):
@@ -184,8 +186,8 @@ class PhraseHandler(Handler):
 
     @staticmethod
     def _to_db_row(fields):
-        source_text = fields['sourceText']
-        target_text = fields['targetText']
+        source_text = fields['sourceText'].strip()
+        target_text = fields['targetText'].strip()
         return {
             'source_text': source_text,
             'target_text': target_text,

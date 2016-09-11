@@ -11,6 +11,10 @@ from models import user
 from utils import Handler, json_request, json_response, make_handlers
 
 
+def sid_key(sid):
+    return "session_id:" + sid
+
+
 class User:
 
     def __init__(self, fields, session_id=None):
@@ -61,11 +65,11 @@ class User:
             path="/",
             http_only=False,
             secure=config['secure'])
-        app_context.redis.set(sid, self.as_json, ex=duration)
+        app_context.redis.set(sid_key(sid), self.as_json, ex=duration)
 
     def delete_session(self, app_context, resp):
         resp.unset_cookie("session_id")
-        app_context.redis.delete(self._session_id)
+        app_context.redis.delete(sid_key(self._session_id))
 
     @staticmethod
     def _create_session_id():
@@ -85,7 +89,8 @@ class AuthMiddleware:
         if sid is None:
             return
         pipe = self.app_context.redis.pipeline()
-        data, _ = pipe.get(sid).expire(sid, duration).execute()
+        skey = sid_key(sid)
+        data, _ = pipe.get(skey).expire(skey, duration).execute()
         if data is None:
             return
         req.context['user'] = User.from_json(data, sid)

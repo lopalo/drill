@@ -1,3 +1,4 @@
+import {actions as formActions} from "react-redux-form";
 
 
 export const REQUEST_PAGE_DATA = "dictionary/REQUEST_PAGE_DATA";
@@ -62,6 +63,12 @@ export const requestUpdatePhrase = (phraseId, data) => ({
     phraseId,
     data
 });
+
+
+export const resetTextFields = formModel => dispatch => {
+    dispatch(formActions.reset(formModel + ".sourceText"));
+    dispatch(formActions.reset(formModel + ".targetText"));
+};
 
 
 export const requestDeletePhrase = phraseId => ({

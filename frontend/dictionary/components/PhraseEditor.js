@@ -3,7 +3,6 @@ import {bindActionCreators} from "redux";
 import {connect} from "react-redux";
 import {Form, Errors, utils} from "react-redux-form";
 import {push} from "react-router-redux";
-import {actions as formActions} from "react-redux-form";
 import omit from "lodash/omit";
 import get from "lodash/get";
 import validator from "validator";
@@ -11,13 +10,16 @@ import validator from "validator";
 import {
     requestPhrase,
     requestCreatePhrase,
-    requestUpdatePhrase
+    requestUpdatePhrase,
+    resetTextFields
 } from "../actions";
 import {themeList, grammarSectionList} from "../selectors";
 import FormGroup from "../../common/components/FormGroup";
 
 
-const textDifference = ({sourceText, targetText}) => sourceText !== targetText;
+const textDifference = ({sourceText, targetText}) => (
+    sourceText.trim() !== targetText.trim()
+);
 
 const intList = l => l.map(i => parseInt(i));
 
@@ -28,7 +30,7 @@ const EditForm = ({
     params: {phraseId},
     onClose,
     onSubmit,
-    submitted,
+    form,
     themes,
     grammarSections
 }) => (
@@ -75,15 +77,19 @@ const EditForm = ({
               <input type="text" className="form-control" />
             </FormGroup>
 
-            <FormGroup model={field("sourceLang")}>
-              <label className="control-label">Source Lang</label>
-              <input type="text" className="form-control" readOnly />
-            </FormGroup>
+            {phraseId &&
+              <FormGroup model={field("sourceLang")}>
+                <label className="control-label">Source Lang</label>
+                <input type="text" className="form-control" readOnly />
+              </FormGroup>
+            }
 
-            <FormGroup model={field("targetLang")}>
-              <label className="control-label">Target Lang</label>
-              <input type="text" className="form-control" readOnly />
-            </FormGroup>
+            {phraseId &&
+              <FormGroup model={field("targetLang")}>
+                <label className="control-label">Target Lang</label>
+                <input type="text" className="form-control" readOnly />
+              </FormGroup>
+            }
 
             <FormGroup model={field("grammarSections")} parser={intList}>
               <label className="control-label">Grammar Sections</label>
@@ -106,12 +112,12 @@ const EditForm = ({
           </div>
           <div className="modal-footer">
             <span className={"text-success" + (
-                             submitted ? "" : " disappearing")} >
+                             form.submitted ? "" : " disappearing")} >
               The changes have been saved
               &nbsp; &nbsp;
             </span>
             <button type="submit" className="btn btn-primary">
-              Save changes
+              {phraseId ? "Save changes" : "Submit"}
             </button>
             <button type="button" className="btn btn-default" onClick={onClose}>
               Close
@@ -153,7 +159,7 @@ const mapDispatchToProps = (
 ) => bindActionCreators({
     onClose: () => push("dictionary"),
     onDidMount: phraseId ? () => requestPhrase(phraseId) : null,
-    onWillUnmount: () => formActions.reset(model),
+    onWillUnmount: () => resetTextFields(model),
     onSubmit: phraseId ?
         data => requestUpdatePhrase(phraseId, data) : requestCreatePhrase
 }, dispatch);
