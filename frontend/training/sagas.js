@@ -9,7 +9,7 @@ import {
     addPhrase
 } from "./actions";
 import {profile} from "../common/selectors";
-import {phrase, isCompleted} from "./selectors";
+import {phrase, isCompleted, workingSet} from "./selectors";
 import {setProperty} from "../common/actions";
 import {
     fetchJSON,
@@ -27,18 +27,24 @@ const getVoice = () => synth.getVoices().find(
 function* fetchWorkingSet() {
     yield* takeLatest(REQUEST_WORKING_SET, function* () {
         let set = yield* fetchJSON("/training/working-set");
+        let queue = Object.keys(set).sort();
         yield put(setProperty("pages.training.workingSet", set));
+        yield put(setProperty("pages.training.ui.ringQueue", queue));
     });
 }
 
 
 function* passPhrase() {
-    yield* takeEvery(PASS_PHRASE, function* ({progress, phraseId: id}) {
-        yield* cancelSpeech();
-        let url = "/training/increment-progress";
-        if (!progress) return;
-        yield* fetchJSON(url, {id, progress}, {method: "POST"});
-    });
+    yield* takeEvery(
+        PASS_PHRASE,
+        function* ({phraseId: id, progress}) {
+            yield* cancelSpeech();
+            let completed = (yield select(workingSet))[id].isCompleted;
+            let url = "/training/increment-progress";
+            if (!progress || completed) return;
+            yield* fetchJSON(url, {id, progress}, {method: "POST"});
+        }
+    );
 }
 
 

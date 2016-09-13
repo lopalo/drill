@@ -13,20 +13,9 @@ const ui = create(training, training => training.ui);
 
 const workingSet = create(training, training => training.workingSet);
 
-const phraseIndex = create(ui, ui => ui.phraseIndex);
+const phraseId = create(ui, ui => ui.ringQueue[0]);
 
-const nextPhraseIndex = create(
-    phraseIndex,
-    workingSet,
-    (index, workingSet) => workingSet.length - 1 === index ? 0 : index + 1
-);
-
-const phrase = create(
-    workingSet,
-    phraseIndex,
-    (workingSet, index) => workingSet[index]
-);
-
+const phrase = create(workingSet, phraseId, (set, id) => set[id]);
 
 const getWords = text => text.split(" ");
 
@@ -93,9 +82,9 @@ const lastWord = create(targetWords, last);
 export {
     WORD_STATUS,
     ui,
+    workingSet,
     phrase,
-    phraseIndex,
-    nextPhraseIndex,
+    phraseId,
     wordsStatus,
     isCompleted,
     targetWords,

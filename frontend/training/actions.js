@@ -39,19 +39,9 @@ export const passPhrase = progress => (dispatch, getState) => {
     let state = getState();
     let p = phrase(state);
     if (p.progress + progress >= p.repeats) {
-        dispatch({
-            type: COMPLETE_PHRASE,
-            phraseIndex: phraseIndex(state),
-            phraseId: p.id
-        });
+        dispatch({type: COMPLETE_PHRASE, phraseId: p.id});
     } else {
-        dispatch({
-            type: PASS_PHRASE,
-            phraseId: p.id,
-            phraseIndex: phraseIndex(state),
-            nextPhraseIndex: nextPhraseIndex(state),
-            progress: progress
-        });
+        dispatch({type: PASS_PHRASE, phraseId: p.id, progress: progress});
     }
 };
 

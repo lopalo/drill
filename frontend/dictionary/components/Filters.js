@@ -15,6 +15,7 @@ const Filters = ({filters, grammarSections, themes, onFilterChanged}) => (
         type="search"
         className="form-control"
         placeholder="Search..."
+        value={filters.text}
         onChange={e => onFilterChanged("text", e.target.value)}
         />
         <span className="glyphicon glyphicon-search form-control-feedback">

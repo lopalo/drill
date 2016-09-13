@@ -21,6 +21,13 @@ const textDifference = ({sourceText, targetText}) => (
     sourceText.trim() !== targetText.trim()
 );
 
+const apostrophe = str => !str.includes("’");
+
+const textErrorMessages = {
+    length: "Too short text",
+    apostrophe: "Wrong apostrophe"
+};
+
 const intList = l => l.map(i => parseInt(i));
 
 const model = "pages.dictionary.phrase";
@@ -41,10 +48,12 @@ const EditForm = ({
           validators={{
               "": {textDifference},
               sourceText: {
-                  length: v => validator.isLength(v, {min: 3})
+                  length: v => validator.isLength(v, {min: 3}),
+                  apostrophe
               },
               targetText: {
-                  length: v => validator.isLength(v, {min: 3})
+                  length: v => validator.isLength(v, {min: 3}),
+                  apostrophe
               },
           }}>
 
@@ -66,13 +75,13 @@ const EditForm = ({
             }} />
 
             <FormGroup model={field("sourceText")}
-                       errorMessages={{length: "Too short text"}}>
+                       errorMessages={textErrorMessages}>
               <label className="control-label">Source Text</label>
               <input type="text" className="form-control" />
             </FormGroup>
 
             <FormGroup model={field("targetText")}
-                       errorMessages={{length: "Too short text"}}>
+                       errorMessages={textErrorMessages}>
               <label className="control-label">Target Text</label>
               <input type="text" className="form-control" />
             </FormGroup>

@@ -42,8 +42,8 @@ class WorkingSetHandler(Handler):
         sel = select_expression(user_id).limit(self.size)
         rows = self.db.execute(sel).fetchall()
         dt_format = self.app_context.config['my-dictionary']['datetime-format']
-        resp.body = list(map(self.convert_phrase_view,
-                             map(phrase_view(dt_format), rows)))
+        view = phrase_view(dt_format)
+        resp.body = {r.id: self.convert_phrase_view(view(r)) for r in rows}
 
     @before(json_request)
     @after(json_response)
