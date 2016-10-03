@@ -23,7 +23,7 @@ class GroupHandler(Handler):
     def key(self):
         raise NotImplementedError
 
-    def invalidate_cache(self):
+    def _invalidate_cache(self):
         self.app_context.redis.delete(self.key)
 
     def on_get(self, req, resp):
@@ -85,7 +85,7 @@ class GrammarSectionsHandler(GroupHandler):
             return
         try:
             self.db.execute(expr)
-            self.invalidate_cache()
+            self._invalidate_cache()
         except IntegrityError:
             pass
         resp.body = self._get()
@@ -133,7 +133,7 @@ class ThemesHandler(GroupHandler):
             return
         try:
             self.db.execute(expr)
-            self.invalidate_cache()
+            self._invalidate_cache()
         except IntegrityError:
             pass
         resp.body = self._get()

@@ -1,16 +1,20 @@
 version: '2'
+# use "docker-compose exec" to run a command in a running service
 services:
     wsgi_app:
         container_name: wsgi_app
         image: lopalo/drill-backend
+        depends_on:
+            - postgres
+            - redis
         volumes:
             - "..:/drill"
-        ports:
-            - "127.0.0.1:9191:9191"
         command: uwsgi --yaml /drill/configs/uwsgi.yaml
     nginx:
         container_name: nginx
         image: nginx:1.10.1
+        depends_on:
+            - wsgi_app
         volumes:
             - "..:/drill"
         ports:
@@ -19,19 +23,15 @@ services:
     postgres:
         container_name: postgres
         image: postgres:9.5.3
-        ports:
-            - "127.0.0.1:5432:5432"
         volumes:
             - "../db:/var/lib/postgresql/data"
+            - "./postgresql.conf:/var/lib/postgresql/data/postgresql.conf"
+            - "../logs:/var/lib/postgresql/data/logs"
     redis:
         container_name: redis
         image: redis:3.2.3
-        ports:
-            - "127.0.0.1:6379:6379"
-    script:
-        container_name: script
-        image: lopalo/drill-backend
         volumes:
-            - "..:/drill"
-        command: bash
+            - "./redis.conf:/data/redis.conf"
+            - "../logs:/data/logs"
+        command: redis-server /data/redis.conf
 

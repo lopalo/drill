@@ -33,7 +33,7 @@ class WorkingSetHandler(Handler):
             return i
         i['progress'] = 0
         rfactor = self.config['completed-repeat-factor']
-        i['repeats'] =  int(ceil(i['repeats'] * rfactor))
+        i['repeats'] = int(ceil(i['repeats'] * rfactor))
         return i
 
     @after(json_response)

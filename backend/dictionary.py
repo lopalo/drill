@@ -104,6 +104,7 @@ class ListHandler(Handler):
 
 @before(require_admin)
 class PhraseHandler(Handler):
+
     @after(json_response)
     def on_get(self, req, resp, phrase_id):
         columns = []
@@ -144,9 +145,10 @@ class PhraseHandler(Handler):
             for theme_id in body['grammarSections']])
         with self.db.begin() as conn:
             if body['themes']:
-                conn.execute(themes_ins);
+                conn.execute(themes_ins)
             if body['grammarSections']:
-                conn.execute(sections_ins);
+                conn.execute(sections_ins)
+        self._invalidate_groups_cache()
 
     @before(json_request)
     def on_put(self, req, resp, phrase_id):
@@ -171,18 +173,19 @@ class PhraseHandler(Handler):
             {'section_id': theme_id, 'phrase_id': phrase_id}
             for theme_id in body['grammarSections']])
         with self.db.begin() as conn:
-            conn.execute(phrase_upd);
+            conn.execute(phrase_upd)
             conn.execute(themes_del)
             conn.execute(sections_del)
             if body['themes']:
-                conn.execute(themes_ins);
+                conn.execute(themes_ins)
             if body['grammarSections']:
-                conn.execute(sections_ins);
-
+                conn.execute(sections_ins)
+        self._invalidate_groups_cache()
 
     def on_delete(self, req, resp, phrase_id):
         delete = phrase.delete().where(phrase.c.id == phrase_id)
         self.db.execute(delete)
+        self._invalidate_groups_cache()
 
     @staticmethod
     def _to_db_row(fields):
@@ -195,6 +198,9 @@ class PhraseHandler(Handler):
             'target_lang': guess_language(target_text),
         }
 
+    def _invalidate_groups_cache(self):
+        keys = GrammarSectionsHandler.key, ThemesHandler.key
+        self.app_context.redis.delete(*keys)
 
 configure_handlers = make_handlers("/dictionary/", [
     ("list", ListHandler),

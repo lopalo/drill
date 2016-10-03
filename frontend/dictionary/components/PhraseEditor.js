@@ -77,13 +77,13 @@ const EditForm = ({
             <FormGroup model={field("sourceText")}
                        errorMessages={textErrorMessages}>
               <label className="control-label">Source Text</label>
-              <input type="text" className="form-control" />
+              <textarea className="form-control" />
             </FormGroup>
 
             <FormGroup model={field("targetText")}
                        errorMessages={textErrorMessages}>
               <label className="control-label">Target Text</label>
-              <input type="text" className="form-control" />
+              <textarea className="form-control" />
             </FormGroup>
 
             {phraseId &&

@@ -19,7 +19,8 @@ metadata = MetaData()
 Language = Enum("en", "ru", name="language", native_enum=True)
 
 
-user = Table("user", metadata,
+user = Table(
+    "user", metadata,
     Column("id", Integer, primary_key=True),
     Column("name", String(50), nullable=False),
     Column("email", String(50), unique=True, nullable=False),
@@ -28,7 +29,8 @@ user = Table("user", metadata,
 )
 
 
-phrase = Table("phrase", metadata,
+phrase = Table(
+    "phrase", metadata,
     Column("id", Integer, primary_key=True),
     Column("source_text", Text, nullable=False),
     Column("target_text", Text, nullable=False),
@@ -40,13 +42,15 @@ phrase = Table("phrase", metadata,
 )
 
 
-grammar_section = Table("grammar_section", metadata,
+grammar_section = Table(
+    "grammar_section", metadata,
     Column("id", Integer, primary_key=True),
     Column("title", Text, nullable=False, unique=True),
 )
 
 
-theme = Table("theme", metadata,
+theme = Table(
+    "theme", metadata,
     Column("id", Integer, primary_key=True),
     Column("title", Text, nullable=False, unique=True),
 )
@@ -90,10 +94,4 @@ user_phrase = Table(
     Column("progress", Integer, nullable=False, server_default="0"),
     CheckConstraint(column("progress") <= column("repeats"))
 )
-
-
-
-
-
-
 
