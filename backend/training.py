@@ -43,7 +43,7 @@ class WorkingSetHandler(Handler):
         rows = self.db.execute(sel).fetchall()
         dt_format = self.app_context.config['my-dictionary']['datetime-format']
         view = phrase_view(dt_format)
-        resp.body = {r.id: self.convert_phrase_view(view(r)) for r in rows}
+        resp.body = [self.convert_phrase_view(view(r)) for r in rows]
 
     @before(json_request)
     @after(json_response)

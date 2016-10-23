@@ -35,7 +35,7 @@ NavItem.contextTypes = {
 };
 
 
-class AppComponent extends React.Component {
+var App = class extends React.Component {
     render() {
         return this.props.user === null ? <Auth /> : this.renderApp();
     }
@@ -60,9 +60,9 @@ class AppComponent extends React.Component {
           </div>
         );
     }
-}
+};
 
-const App = connect(s => ({user: s.user}))(AppComponent);
+App = connect(s => ({user: s.user}))(App);
 
 
 export default ({history}) => (

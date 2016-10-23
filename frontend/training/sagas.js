@@ -26,8 +26,13 @@ const getVoice = () => synth.getVoices().find(
 
 function* fetchWorkingSet() {
     yield* takeLatest(REQUEST_WORKING_SET, function* () {
-        let set = yield* fetchJSON("/training/working-set");
-        let queue = Object.keys(set).sort();
+        let set = {};
+        let queue = [];
+        let data = yield* fetchJSON("/training/working-set");
+        for (let i of data) {
+            set[i.id] = i;
+            queue.push(i.id);
+        }
         yield put(setProperty("pages.training.workingSet", set));
         yield put(setProperty("pages.training.ui.ringQueue", queue));
     });
