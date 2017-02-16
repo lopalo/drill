@@ -14,6 +14,8 @@ from utils import Handler, json_request, json_response, make_handlers
 def sid_key(sid):
     return "session_id:" + sid
 
+#TODO: user's account activation via e-mail confirmation
+#TODO: validate request arguments
 
 class User:
 
@@ -126,7 +128,6 @@ class LoginHandler(Handler):
     @before(json_request)
     @after(json_response)
     def on_post(self, req, resp):
-        #TODO: validate args
         body = req.context['body']
         result = resp.body = {'error': None, 'user': None}
         error = "Wrong email or password"
@@ -161,7 +162,6 @@ class RegisterHandler(Handler):
     @before(json_request)
     @after(json_response)
     def on_post(self, req, resp):
-        #TODO: validate args
         body = req.context['body']
         result = resp.body = {'error': None, 'user': None}
 

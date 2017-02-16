@@ -1,6 +1,4 @@
 import {
-    phraseIndex,
-    nextPhraseIndex,
     targetWords,
     phrase
 } from "./selectors";
@@ -15,6 +13,7 @@ export const PASS_PHRASE = "training/PASS_PHRASE";
 export const COMPLETE_PHRASE = "training/COMPLETE_PHRASE";
 export const GIVE_UP = "training/GIVE_UP";
 export const SPEAK = "training/SPEAK";
+export const RESET = "training/RESET";
 
 
 export const requestWorkingSet = () => ({type: REQUEST_WORKING_SET});
@@ -54,4 +53,7 @@ export const giveUp = () => (dispatch, getState) => {
 };
 
 
-export const speak = () => ({type: SPEAK});
+export const speak = text => ({type: SPEAK, text});
+
+
+export const reset = () => ({type: RESET});

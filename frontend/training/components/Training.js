@@ -9,7 +9,8 @@ import {
     passPhrase,
     giveUp,
     speak,
-    requestWorkingSet
+    requestWorkingSet,
+    reset
 } from "../actions";
 
 import {
@@ -62,9 +63,13 @@ var Training = class extends React.Component {
                 break;
         }
     }
+    onSpeakClick() {
+        let {speak, phrase: {targetText}} = this.props;
+        speak(targetText);
+    }
     handleButtonKeyDown(event) {
         if (event.keyCode === 76) {
-            this.props.onSpeakClick();
+            this.onSpeakClick();
         }
     }
     render() {
@@ -78,7 +83,7 @@ var Training = class extends React.Component {
             onProgressClick,
             onNextClick,
             onGiveUpClick,
-            onSpeakClick
+            speak,
         } = this.props;
         let progress = phrase.progress / phrase.repeats * 100;
         let barClass = "progress-bar ";
@@ -97,7 +102,9 @@ var Training = class extends React.Component {
               <h4 className="well">{phrase.sourceText}</h4>
               <div className="panel panel-default">
                 <div className="panel-body form-inline">
-                  {wordsStatus.map((i, idx) => <WordStatus key={idx} {...i} />)}
+                  {wordsStatus.map((i, idx) =>
+                      <WordStatus key={idx} {...i} speak={speak} />)
+                  }
                   {!isCompleted && !isGivenUp &&
                     <input
                       type="text"
@@ -140,7 +147,8 @@ var Training = class extends React.Component {
                   </button>
                 }
                 {(isCompleted || isGivenUp) &&
-                  <button className={speakBtnClass} onClick={onSpeakClick}>
+                  <button className={speakBtnClass}
+                          onClick={() => this.onSpeakClick()}>
                     <span className="glyphicon glyphicon-volume-up">
                     </span>
                   </button>
@@ -153,8 +161,9 @@ var Training = class extends React.Component {
 };
 
 
-const WordStatus = ({target, actual, status}) => {
+const WordStatus = ({target, actual, status, speak}) => {
     if (!actual) return null;
+    let onClick = () => target ? speak(target) : null;
     let btnClass = "btn ";
     switch (status) {
         case WORD_STATUS.OK:
@@ -169,7 +178,7 @@ const WordStatus = ({target, actual, status}) => {
     }
     btnClass += " btn-tooltip";
     return (
-      <div className={btnClass}>
+      <div className={btnClass} onClick={onClick}>
         {actual}
         {target && <span className="btn-tooltip-text">{target}</span>}
       </div>
@@ -194,7 +203,7 @@ mapDispatchToProps = dispatch => bindActionCreators({
     onProgressClick: () => passPhrase(1),
     onNextClick: () => passPhrase(0),
     onGiveUpClick: giveUp,
-    onSpeakClick: speak,
+    speak
 }, dispatch);
 
 
@@ -206,7 +215,9 @@ Training = connect(
 
 class TrainingWrapper extends React.Component {
     componentDidMount() {
-        this.props.onDidMount();
+        let {reset, requestWorkingSet} = this.props;
+        reset();
+        requestWorkingSet();
     }
     render() {
         let {phrase} = this.props;
@@ -223,7 +234,8 @@ class TrainingWrapper extends React.Component {
 mapStateToProps = createStructuredSelector({phrase});
 
 mapDispatchToProps = dispatch => bindActionCreators({
-    onDidMount: requestWorkingSet
+    requestWorkingSet,
+    reset
 }, dispatch);
 
 export default connect(

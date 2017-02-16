@@ -6,6 +6,7 @@ import {actions as formActions} from "react-redux-form";
 
 import {
     REQUEST_PAGE_DATA,
+    LOAD_MORE,
 
     REQUEST_CREATE_GRAMMAR_SECTION,
     REQUEST_DELETE_GRAMMAR_SECTION,
@@ -19,10 +20,10 @@ import {
     REQUEST_DELETE_PHRASE,
 
     REQUEST_ADD_TO_MY_DICT,
-    SET_FILTER
-
+    SET_FILTER,
 } from "./actions";
-import {filters} from "./selectors";
+import * as actions from "./actions";
+import {filters, list} from "./selectors";
 import {setProperty} from "../common/actions";
 import {
     fetchJSON,
@@ -31,7 +32,7 @@ import {
 } from "../common/sagas";
 
 
-function* doFetchList() {
+function* doFetchList(more=false) {
     let fs = yield select(filters);
     let url = `/dictionary/list?target-language=${fs.targetLanguage}`;
     if (fs.grammarSection !== null) {
@@ -43,8 +44,27 @@ function* doFetchList() {
     if (fs.text) {
         url += `&text=${fs.text}`;
     }
-    let list = yield* fetchJSON(url);
-    yield put(setProperty("pages.dictionary.data.list", list));
+    if (more) {
+        let offset = (yield select(list)).length;
+        url += `&offset=${offset}`;
+    }
+    let lst = yield* fetchJSON(url);
+    if (more) {
+        yield put(actions.extendList(lst));
+    } else {
+        yield put(setProperty("pages.dictionary.data.list", lst));
+    }
+}
+
+function* doFetchGroups() {
+    yield fork(function* () {
+        let themes = yield* fetchJSON("/dictionary/themes");
+        yield put(setProperty("pages.dictionary.data.themes", themes));
+    });
+    yield fork(function* () {
+        let gs = yield* fetchJSON("/dictionary/grammar-sections");
+        yield put(setProperty("pages.dictionary.data.grammarSections", gs));
+    });
 }
 
 function* monitorFilters() {
@@ -63,20 +83,17 @@ function* monitorFilters() {
 
 }
 
-function* doFetchPageData() {
-    yield fork(doFetchList);
-    yield fork(function* () {
-        let themes = yield* fetchJSON("/dictionary/themes");
-        yield put(setProperty("pages.dictionary.data.themes", themes));
-    });
-    yield fork(function* () {
-        let gs = yield* fetchJSON("/dictionary/grammar-sections");
-        yield put(setProperty("pages.dictionary.data.grammarSections", gs));
+
+function* fetchPageData() {
+    yield* takeLatest(REQUEST_PAGE_DATA, function* () {
+        yield fork(doFetchList);
+        yield fork(doFetchGroups);
     });
 }
 
-function* fetchPageData() {
-    yield* takeLatest(REQUEST_PAGE_DATA, doFetchPageData);
+
+function* loadMore() {
+    yield* takeLatest(LOAD_MORE, () => doFetchList(true));
 }
 
 
@@ -133,9 +150,14 @@ function* fetchPhrase() {
 
 function* createPhrase() {
     yield* takeEvery(REQUEST_CREATE_PHRASE, function* ({data}) {
-        yield* fetchJSON("/dictionary/create-phrase", data, {method: "POST"});
+        let {id} = yield* fetchJSON(
+            "/dictionary/create-phrase",
+            data,
+            {method: "POST"}
+        );
+        yield put(actions.createPhrase({...data, id}));
         yield put(push("dictionary"));
-        yield* doFetchPageData();
+        yield* doFetchGroups();
     });
 }
 
@@ -145,7 +167,7 @@ function* updatePhrase() {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, data, {method: "PUT"});
         yield put(formActions.setSubmitted(phraseFormModel, true));
-        yield* doFetchPageData();
+        yield* doFetchGroups();
         yield* doFetchPhrase({phraseId});
         yield put(formActions.setInitial(phraseFormModel));
     });
@@ -156,7 +178,7 @@ function* deletePhrase() {
     yield* takeEvery(REQUEST_DELETE_PHRASE, function* ({phraseId}) {
         let url = `/dictionary/phrase/${phraseId}`;
         yield* fetchJSON(url, null, {method: "DELETE"});
-        yield* doFetchPageData();
+        yield* doFetchGroups();
     });
 }
 
@@ -165,13 +187,13 @@ function* addPhraseToMyDict() {
     yield* takeEvery(REQUEST_ADD_TO_MY_DICT, function* ({phraseId}) {
         let data = {id: phraseId};
         yield* fetchJSON("/my-dictionary/add-phrase", data, {method: "POST"});
-        yield* doFetchList();
     });
 }
 
 
 export default [
     fetchPageData,
+    loadMore,
     fetchPhrase,
     createPhrase,
     updatePhrase,

@@ -1,7 +1,8 @@
 import {combineReducers} from "redux";
 import {modelReducer, formReducer} from "react-redux-form";
+import {unshift} from "icepick";
 
-import {SET_FILTER} from "./actions";
+import * as actions from "./actions";
 
 const filters = (state={
     targetLanguage: "en",
@@ -9,11 +10,31 @@ const filters = (state={
     theme: null,
     text: ""
 }, action) => (
-    action.type === SET_FILTER ?
+    action.type === actions.SET_FILTER ?
     {...state, [action.fieldName]: action.value} : state
 );
 
-const list = (state=[]) => state;
+const list = (state=[], action) => {
+    switch (action.type) {
+        case actions.EXTEND_LIST:
+            return [...state, ...action.list];
+        case actions.CREATE_PHRASE:
+            return unshift(state, {...action.data, modified: true});
+        case actions.REQUEST_UPDATE_PHRASE:
+            return state.map(i =>
+                i.id === action.phraseId ?
+                    {...i, ...action.data, modified: true} : i
+            );
+        case actions.REQUEST_DELETE_PHRASE:
+            return state.filter(i => i.id !== action.phraseId);
+        case actions.REQUEST_ADD_TO_MY_DICT:
+            return state.map(i =>
+                i.id === action.phraseId ? {...i, isInMyDict: true} : i
+            );
+        default:
+            return state;
+    }
+};
 const themes = (state=[]) => state;
 const grammarSections = (state=[]) => state;
 

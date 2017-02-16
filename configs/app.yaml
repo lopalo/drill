@@ -9,6 +9,8 @@ redis:
 session:
     duration-seconds: 3600
     secure: false
+dictionary:
+    limit: 15
 my-dictionary:
     default-repeats: 5
     datetime-format: "%Y-%m-%d %H:%M"

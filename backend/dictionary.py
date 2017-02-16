@@ -13,6 +13,9 @@ from models import (
 from dictionary_groups import GrammarSectionsHandler, ThemesHandler
 
 
+#TODO: validate request arguments
+
+
 def phrase_view(row):
     return {
         'id': row.id,
@@ -90,14 +93,17 @@ class ListHandler(Handler):
             is_in_my_dict,
             user.c.name.label("added_by")
         ])
+        limit = self.app_context.config['dictionary']['limit']
         sel = (
             select(columns).
             distinct(pc.id).
             select_from(joined).
             order_by(pc.id.desc())
-        )
+        ).limit(limit)
         if conditions:
             sel = sel.where(and_(*conditions))
+        if "offset" in params:
+            sel = sel.offset(params['offset'])
         rows = self.db.execute(sel).fetchall()
         resp.body = list(map(phrase_list_view, rows))
 
@@ -131,6 +137,7 @@ class PhraseHandler(Handler):
         resp.body = phrase_editor_view(self.db.execute(sel).fetchone())
 
     @before(json_request)
+    @after(json_response)
     def on_post(self, req, resp):
         body = req.context['body']
         row = self._to_db_row(body)
@@ -149,6 +156,7 @@ class PhraseHandler(Handler):
             if body['grammarSections']:
                 conn.execute(sections_ins)
         self._invalidate_groups_cache()
+        resp.body = {'id': phrase_id}
 
     @before(json_request)
     def on_put(self, req, resp, phrase_id):

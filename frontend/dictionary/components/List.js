@@ -37,7 +37,7 @@ const List = ({list, isAdmin, onAddToMyDict, onDelete}) => (
 
 
 const ListItem = ({row, isAdmin, onDelete, onAddToMyDict}) => (
-  <tr>
+  <tr className={row.modified ? "warning" : ""}>
     <td>{row.sourceText}</td>
     <td>{row.targetText}</td>
     <td>{row.addedBy}</td>

@@ -14,6 +14,8 @@ const initialUiState = {
 const ui = (state=initialUiState, action) => {
     let {completedWords, ringQueue} = state;
     switch (action.type) {
+        case actions.RESET:
+            return initialUiState;
         case actions.COMPLETE_WORD:
             return {
                 ...state,

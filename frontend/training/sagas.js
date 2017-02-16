@@ -9,7 +9,7 @@ import {
     addPhrase
 } from "./actions";
 import {profile} from "../common/selectors";
-import {phrase, isCompleted, workingSet} from "./selectors";
+import {isCompleted, workingSet, phrase} from "./selectors";
 import {setProperty} from "../common/actions";
 import {
     fetchJSON,
@@ -65,7 +65,7 @@ function* completePhrase() {
 
 
 function* speak() {
-    yield* takeLatest(SPEAK, activateSpeech);
+    yield* takeLatest(SPEAK, ({text}) => activateSpeech(text));
 }
 
 
@@ -74,16 +74,16 @@ function* autoSpeak() {
         let completed = yield select(isCompleted);
         let prof = yield select(profile);
         if (completed && prof.autoSpeak) {
-            yield* activateSpeech();
+            let {targetText} = yield select(phrase);
+            yield* activateSpeech(targetText);
         }
     });
 }
 
 
-function* activateSpeech() {
+function* activateSpeech(text) {
     yield* cancelSpeech();
-    let {targetText} = yield select(phrase);
-    let utterance = new SpeechSynthesisUtterance(targetText);
+    let utterance = new SpeechSynthesisUtterance(text);
     utterance.voice = getVoice();
     synth.speak(utterance);
     yield put(setProperty("pages.training.ui.speechIsActive", true));

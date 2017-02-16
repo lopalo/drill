@@ -26,19 +26,11 @@ const compareWords = (target, actual) => {
     if (target === actual) {
         return WORD_STATUS.OK;
     }
-    target = target.toLowerCase();
-    actual = actual.toLowerCase();
+    let normalize = str => str.toLowerCase().replace(/[.,:;?!"-\s]/g, "");
+    target = normalize(target);
+    actual = normalize(actual);
     if (target === actual) {
         return WORD_STATUS.WARNING;
-    }
-    let lastChar = last(target);
-    let initStr = target.slice(0, -1);
-    if (initStr === actual) {
-        switch (lastChar) {
-            case ",":
-            case ".":
-                return WORD_STATUS.WARNING;
-        }
     }
     return WORD_STATUS.ERROR;
 };

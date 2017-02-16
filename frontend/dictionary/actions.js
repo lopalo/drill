@@ -14,16 +14,22 @@ export const REQUEST_DELETE_THEME = "dictionary/REQUEST_DELETE_THEME";
 
 
 export const REQUEST_PHRASE = "dictionary/REQUEST_PHRASE";
+export const LOAD_MORE = "dictionary/LOAD_MORE";
 export const REQUEST_CREATE_PHRASE = "dictionary/REQUEST_CREATE_PHRASE";
 export const REQUEST_UPDATE_PHRASE = "dictionary/REQUEST_UPDATE_PHRASE";
 export const REQUEST_DELETE_PHRASE = "dictionary/REQUEST_DELETE_PHRASE";
 export const REQUEST_ADD_TO_MY_DICT = "dictionary/REQUEST_ADD_TO_MY_DICT";
 
 
+export const CREATE_PHRASE = "dictionary/CREATE_PHRASE";
 export const SET_FILTER = "dictionary/SET_FILTER";
+export const EXTEND_LIST = "dictionary/EXTEND_LIST";
 
 
 export const requestPageData = () => ({type: REQUEST_PAGE_DATA});
+
+
+export const loadMore = () => ({type: LOAD_MORE});
 
 
 export const requestCreateGrammarSection = title => ({
@@ -65,6 +71,12 @@ export const requestUpdatePhrase = (phraseId, data) => ({
 });
 
 
+export const createPhrase = data => ({
+    type: CREATE_PHRASE,
+    data
+});
+
+
 export const resetTextFields = formModel => dispatch => {
     dispatch(formActions.reset(formModel + ".sourceText"));
     dispatch(formActions.reset(formModel + ".targetText"));
@@ -89,3 +101,5 @@ export const setFilter = (fieldName, value) => ({
     value
 });
 
+
+export const extendList = list => ({type: EXTEND_LIST, list});

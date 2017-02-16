@@ -170,7 +170,8 @@ const mapDispatchToProps = (
     onDidMount: phraseId ? () => requestPhrase(phraseId) : null,
     onWillUnmount: () => resetTextFields(model),
     onSubmit: phraseId ?
-        data => requestUpdatePhrase(phraseId, data) : requestCreatePhrase
+        data => requestUpdatePhrase(parseInt(phraseId), data) :
+        requestCreatePhrase
 }, dispatch);
 
 export default connect(

@@ -27,6 +27,9 @@ services:
             - "../db:/var/lib/postgresql/data"
             - "./postgresql.conf:/var/lib/postgresql/data/postgresql.conf"
             - "../logs:/var/lib/postgresql/data/logs"
+        # for making dumps
+        # ports:
+        #     - "127.0.0.1:5432:5432"
     redis:
         container_name: redis
         image: redis:3.2.3
