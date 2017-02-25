@@ -13,6 +13,7 @@ from sqlalchemy import (
     column
 )
 from sqlalchemy.sql import expression as ex
+from sqlalchemy.dialects.postgresql import JSON
 
 metadata = MetaData()
 
@@ -26,6 +27,7 @@ user = Table(
     Column("email", String(50), unique=True, nullable=False),
     Column("password", String(60), nullable=False),
     Column("is_admin", Boolean, nullable=False, server_default=ex.false()),
+    Column("profile", JSON, nullable=False, server_default="{}"),
 )
 
 

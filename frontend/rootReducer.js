@@ -6,6 +6,7 @@ import {user, auth} from "./auth/reducers";
 import training from "./training/reducers";
 import myDictionary from "./my-dictionary/reducers";
 import dictionary from "./dictionary/reducers";
+import profile from "./profile/reducers";
 
 const reducer = combineReducers({
     user,
@@ -15,6 +16,7 @@ const reducer = combineReducers({
         myDictionary,
         dictionary
     }),
+    profile,
     confirmData: (s=null) => s,
     routing: routerReducer
 });

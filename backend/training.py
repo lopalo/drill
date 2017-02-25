@@ -18,11 +18,11 @@ class WorkingSetHandler(Handler):
     def config(self):
         return self.app_context.config['training']
 
-    @property
-    def size(self):
-        return self.config['working-set-size']
+    @staticmethod
+    def size(req):
+        return int(req.context['user'].profile['working-set-size'])
 
-    def convert_phrase_view(self, i):
+    def convert_phrase_view(self, i, req):
         i = i.copy()
         isCompleted = (
             i['completionTime'] is not None or i['progress'] == i['repeats']
@@ -32,18 +32,18 @@ class WorkingSetHandler(Handler):
         if not isCompleted or i['progress'] < i['repeats']:
             return i
         i['progress'] = 0
-        rfactor = self.config['completed-repeat-factor']
+        rfactor = float(req.context['user'].profile['completed-repeat-factor'])
         i['repeats'] = int(ceil(i['repeats'] * rfactor))
         return i
 
     @after(json_response)
     def on_get(self, req, resp):
         user_id = req.context['user'].id
-        sel = select_expression(user_id).limit(self.size)
+        sel = select_expression(user_id).limit(self.size(req))
         rows = self.db.execute(sel).fetchall()
         dt_format = self.app_context.config['my-dictionary']['datetime-format']
         view = phrase_view(dt_format)
-        resp.body = [self.convert_phrase_view(view(r)) for r in rows]
+        resp.body = [self.convert_phrase_view(view(r), req) for r in rows]
 
     @before(json_request)
     @after(json_response)
@@ -60,8 +60,8 @@ class WorkingSetHandler(Handler):
         )
         sel = (
             select_expression(user_id).
-            limit(self.size).
-            offset(self.size - 1)
+            limit(self.size(req)).
+            offset(self.size(req) - 1)
         )
         with self.db.begin() as conn:
             conn.execute(upd)
@@ -69,7 +69,8 @@ class WorkingSetHandler(Handler):
         if new_phrase is None:
             return
         dt_format = self.app_context.config['my-dictionary']['datetime-format']
-        resp.body = self.convert_phrase_view(phrase_view(dt_format)(new_phrase))
+        resp.body = self.convert_phrase_view(
+            phrase_view(dt_format)(new_phrase), req)
 
 
 @before(require_user)

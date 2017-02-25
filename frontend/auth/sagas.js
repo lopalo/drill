@@ -12,12 +12,20 @@ import {
 import {fetchJSON, takeLatestSafely as takeLatest} from "../common/sagas";
 
 
+function* initUser(user) {
+    let profile = user.profile;
+    delete user.profile;
+    yield put(setProperty("user", user));
+    yield put(setProperty("profile", profile));
+}
+
+
 function* fetchUser() {
     yield* takeLatest(REQUEST_USER, function* () {
         yield put(setProperty("auth.isLoading", true));
         try {
             let user = yield* fetchJSON("/auth/user");
-            yield put(setProperty("user", user));
+            yield* initUser(user);
         } catch (e) {
             if (e.response && e.response.status !== 401) {
                 throw e;
@@ -35,7 +43,7 @@ function* login() {
         if (response.error !== null) {
             yield put(setProperty("auth.login.serverError", response.error));
         } else {
-            yield put(setProperty("user", response.user));
+            yield* initUser(response.user);
         }
     });
 }
@@ -49,7 +57,7 @@ function* register() {
         if (response.error !== null) {
             yield put(setProperty("auth.register.serverError", response.error));
         } else {
-            yield put(setProperty("user", response.user));
+            yield* initUser(response.user);
         }
     });
 }

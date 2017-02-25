@@ -19,9 +19,13 @@ import {
 
 
 const synth = window.speechSynthesis;
-const getVoice = () => synth.getVoices().find(
-    v => v.name === "Google UK English Male"
-);
+const getVoice = lang => {
+    let name = "Google UK English Male";
+    if (lang === "ru") {
+        name = "Google русский";
+    }
+    return synth.getVoices().find(v => v.name === name);
+};
 
 
 function* fetchWorkingSet() {
@@ -74,17 +78,33 @@ function* autoSpeak() {
         let completed = yield select(isCompleted);
         let prof = yield select(profile);
         if (completed && prof.autoSpeak) {
-            let {targetText} = yield select(phrase);
-            yield* activateSpeech(targetText);
+            yield* activateSpeech();
         }
     });
 }
 
 
-function* activateSpeech(text) {
+function* activateSpeech(text=null) {
     yield* cancelSpeech();
+    let prof = yield select(profile);
+    let lang = prof.speakLanguage;
+    if (!text) {
+        let {
+            sourceLang,
+            targetLang,
+            sourceText,
+            targetText
+        } = yield select(phrase);
+        if (sourceLang === lang) {
+            text = sourceText;
+        }
+        if (targetLang === lang) {
+            text = targetText;
+        }
+    }
+    if (!text) return;
     let utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = getVoice();
+    utterance.voice = getVoice(lang);
     synth.speak(utterance);
     yield put(setProperty("pages.training.ui.speechIsActive", true));
     yield cps(cb => {utterance.onend = () => cb(null, true);});

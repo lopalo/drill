@@ -64,8 +64,7 @@ var Training = class extends React.Component {
         }
     }
     onSpeakClick() {
-        let {speak, phrase: {targetText}} = this.props;
-        speak(targetText);
+        this.props.speak();
     }
     handleButtonKeyDown(event) {
         if (event.keyCode === 76) {

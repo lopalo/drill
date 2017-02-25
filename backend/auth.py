@@ -8,7 +8,10 @@ from falcon import before, after, HTTPUnauthorized, HTTPForbidden
 from sqlalchemy.exc import IntegrityError
 
 from models import user
-from utils import Handler, json_request, json_response, make_handlers
+from utils import (
+    Handler, json_request, json_response,
+    make_handlers, kebab_to_camel_case
+)
 
 
 def sid_key(sid):
@@ -21,7 +24,6 @@ class User:
 
     def __init__(self, fields, session_id=None):
         fields = dict(fields)
-        fields.setdefault("profile", {})
         self._fields = fields
         self._session_id = session_id
 
@@ -33,14 +35,12 @@ class User:
     @property
     def client_view(self):
         fields = self._fields
-        profile = fields['profile']
         return {
             'name': fields['name'],
-            'email': fields['name'],
+            'email': fields['email'],
             'isAdmin': fields['is_admin'],
-            'profile': {
-                "autoSpeak": profile["auto_speak"]
-            }
+            'profile': {kebab_to_camel_case(k): v for k, v in
+                        fields['profile'].items()}
         }
 
     @property
@@ -52,9 +52,9 @@ class User:
         return cls(json.loads(data.decode("utf-8")), session_id)
 
     def init_profile(self, app_context):
-        #TODO: fetch profile from db
-        ap = app_context.config['training']['auto-speak']
-        self.profile['auto_speak'] = ap
+        for k, v in app_context.config['default-profile'].items():
+            if k not in self.profile:
+                self.profile[k] = v
 
     def create_session(self, app_context, resp):
         sid = self._create_session_id()
@@ -68,6 +68,13 @@ class User:
             http_only=False,
             secure=config['secure'])
         app_context.redis.set(sid_key(sid), self.as_json, ex=duration)
+
+    def update_session(self, app_context):
+        config = app_context.config['session']
+        duration = config['duration-seconds']
+        app_context.redis.set(
+            sid_key(self._session_id),
+            self.as_json, ex=duration)
 
     def delete_session(self, app_context, resp):
         resp.unset_cookie("session_id")

@@ -1,4 +1,3 @@
-
 db:
     url: postgresql+psycopg2://postgres:postgres@postgres:5432/postgres
     echo: false
@@ -12,10 +11,12 @@ session:
 dictionary:
     limit: 15
 my-dictionary:
-    default-repeats: 5
     datetime-format: "%Y-%m-%d %H:%M"
-training:
+default-profile:
     auto-speak: true
+    speak-language: en
+
     working-set-size: 10
+    repeats: 5
     completed-repeat-factor: 0.35
 

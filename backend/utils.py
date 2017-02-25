@@ -1,6 +1,17 @@
 import json
+import re
 
 import falcon
+
+
+def kebab_to_camel_case(string):
+    parts = string.split("-")
+    return parts[0] + "".join(p.capitalize() for p in parts[1:])
+
+
+def camel_to_kebab_case(string):
+    s = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', string)
+    return re.sub('([a-z0-9])([A-Z])', r'\1-\2', s).lower()
 
 
 def json_request(req, resp, resource, params):

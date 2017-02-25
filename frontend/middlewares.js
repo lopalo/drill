@@ -9,6 +9,7 @@ import authSagas from "./auth/sagas";
 import trainingSagas from "./training/sagas";
 import myDictionarySagas from "./my-dictionary/sagas";
 import dictionarySagas from "./dictionary/sagas";
+import profileSagas from "./profile/sagas";
 
 
 const configureSagas = sagaMiddleware => {
@@ -17,7 +18,8 @@ const configureSagas = sagaMiddleware => {
         ...authSagas,
         ...trainingSagas,
         ...myDictionarySagas,
-        ...dictionarySagas
+        ...dictionarySagas,
+        ...profileSagas
     ];
     sagas.forEach(saga => sagaMiddleware.run(saga));
 };

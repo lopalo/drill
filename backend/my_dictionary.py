@@ -13,6 +13,8 @@ def phrase_view(time_format):
             completion_time = completion_time.strftime(time_format)
         return {
             'id': row.id,
+            'sourceLang': row.source_lang,
+            'targetLang': row.target_lang,
             'sourceText': row.source_text,
             'targetText': row.target_text,
             'completionTime': completion_time,
@@ -27,7 +29,8 @@ def select_expression(user_id):
     upc = user_phrase.c
 
     columns = [
-        pc.id, pc.source_text, pc.target_text,
+        pc.id, pc.source_lang, pc.target_lang,
+        pc.source_text, pc.target_text,
         upc.completion_time, upc.repeats, upc.progress
     ]
     joined = user_phrase.join(phrase, upc.phrase_id == pc.id)
@@ -58,7 +61,7 @@ class PhraseHandler(Handler):
 
     @before(json_request)
     def on_post(self, req, resp):
-        repeats = self.app_context.config['my-dictionary']['default-repeats']
+        repeats = int(req.context['user'].profile['repeats'])
         user_id = req.context['user'].id
         phrase_id = req.context['body']['id']
         ins = user_phrase.insert().values(
