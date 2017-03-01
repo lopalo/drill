@@ -2,7 +2,7 @@ from math import ceil
 
 from falcon import before, after
 from sqlalchemy import and_
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func as f
 
 from utils import Handler, json_request, json_response, make_handlers
 from models import user_phrase
@@ -56,7 +56,7 @@ class WorkingSetHandler(Handler):
                 user_phrase.c.user_id == user_id,
                 user_phrase.c.phrase_id == phrase_id
             )).
-            values(progress=user_phrase.c.repeats, completion_time=func.now())
+            values(progress=user_phrase.c.repeats, completion_time=f.now())
         )
         sel = (
             select_expression(user_id).

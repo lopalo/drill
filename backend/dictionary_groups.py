@@ -1,7 +1,7 @@
 import json
 
 from falcon import before, after
-from sqlalchemy import func, select
+from sqlalchemy import func as f, select
 from sqlalchemy.exc import IntegrityError
 
 from utils import Handler, json_response, json_request
@@ -49,7 +49,7 @@ class GrammarSectionsHandler(GroupHandler):
         gsc = grammar_section.c
         gspc = grammar_section_phrase.c
         phrase_amount = (
-            select([gspc.section_id, func.count().label("amount")]).
+            select([gspc.section_id, f.count().label("amount")]).
             group_by(gspc.section_id).
             cte("phrase_amount")
         )
@@ -62,7 +62,7 @@ class GrammarSectionsHandler(GroupHandler):
             select([
                 gsc.id,
                 gsc.title,
-                func.coalesce(phrase_amount.c.amount, 0).label("phrase_amount")
+                f.coalesce(phrase_amount.c.amount, 0).label("phrase_amount")
             ]).
             select_from(joined).
             order_by(gsc.title.asc())
@@ -100,7 +100,7 @@ class ThemesHandler(GroupHandler):
         tc = theme.c
         tpc = theme_phrase.c
         phrase_amount = (
-            select([tpc.theme_id, func.count().label("amount")]).
+            select([tpc.theme_id, f.count().label("amount")]).
             group_by(tpc.theme_id).
             cte("phrase_amount")
         )
@@ -113,7 +113,7 @@ class ThemesHandler(GroupHandler):
             select([
                 tc.id,
                 tc.title,
-                func.coalesce(phrase_amount.c.amount, 0).label("phrase_amount")
+                f.coalesce(phrase_amount.c.amount, 0).label("phrase_amount")
             ]).
             select_from(joined).
             order_by(tc.title.asc())

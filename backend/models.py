@@ -10,14 +10,43 @@ from sqlalchemy import (
     MetaData,
     ForeignKey,
     CheckConstraint,
-    column
+    Index
 )
-from sqlalchemy.sql import expression as ex
+from sqlalchemy.sql import (
+    expression as ex,
+    func as f,
+    column as col,
+    text
+)
 from sqlalchemy.dialects.postgresql import JSON
+
+PG_REG_CONFIG = {"en": "english", "ru": "russian"}
 
 metadata = MetaData()
 
 Language = Enum("en", "ru", name="language", native_enum=True)
+
+tsvector_for_lang = "tsvector_for_lang(lang language, txt text)"
+
+def gen_tsvector_for_lang():
+    options = " ".join("WHEN '{}' THEN '{}'".format(*i)
+                       for i in PG_REG_CONFIG.items())
+    template = """
+    CREATE FUNCTION {func_name} RETURNS tsvector AS $$
+    BEGIN
+        RETURN to_tsvector(
+            CASE lang {options} ELSE '{default}' END :: regconfig,
+            txt
+        );
+    END;
+    $$
+    LANGUAGE plpgsql
+    IMMUTABLE;
+    """
+    return template.format(
+        func_name=tsvector_for_lang,
+        options=options,
+        default=PG_REG_CONFIG["en"])
 
 
 user = Table(
@@ -39,9 +68,15 @@ phrase = Table(
     Column("source_lang", Language, nullable=False),
     Column("target_lang", Language, nullable=False),
     Column("added_by_user_id",
-           ForeignKey("phrase.id", onupdate="CASCADE", ondelete="SET NULL"),
+           ForeignKey("user.id", onupdate="CASCADE", ondelete="SET NULL"),
            index=True)
 )
+
+phrase_text = f.tsvector_concat(
+    f.tsvector_for_lang(phrase.c.source_lang, phrase.c.source_text),
+    f.tsvector_for_lang(phrase.c.target_lang, phrase.c.target_text))
+
+Index("text_idx", phrase_text, postgresql_using="gin")
 
 
 grammar_section = Table(
@@ -94,6 +129,6 @@ user_phrase = Table(
     Column("completion_time", DateTime(timezone=True), index=True),
     Column("repeats", Integer, nullable=False),
     Column("progress", Integer, nullable=False, server_default="0"),
-    CheckConstraint(column("progress") <= column("repeats"))
+    CheckConstraint(col("progress") <= col("repeats"))
 )
 

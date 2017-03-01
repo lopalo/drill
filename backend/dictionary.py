@@ -1,6 +1,6 @@
 from falcon import before, after
 from sqlalchemy import select, exists, and_, or_
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func as f
 from guess_language import guess_language
 
 from utils import Handler, json_response, json_request, make_handlers
@@ -8,7 +8,7 @@ from auth import require_user, require_admin
 from models import (
     phrase, user_phrase, user,
     grammar_section_phrase as gs_phrase,
-    theme_phrase
+    theme_phrase, phrase_text, PG_REG_CONFIG
 )
 from dictionary_groups import GrammarSectionsHandler, ThemesHandler
 
@@ -79,13 +79,13 @@ class ListHandler(Handler):
 
         if "target-language" in params:
             conditions.append(pc.target_lang == params['target-language'])
-        if params.get("text"):
-            #TODO: full text search
-            pattern = "%{}%".format(params['text'])
-            conditions.append(or_(
-                pc.source_text.ilike(pattern),
-                pc.target_text.ilike(pattern),
-            ))
+        text = params.get("text")
+        if text:
+            query = " & ".join(filter(None, text.split(" ")))
+            lang = params.get('language', params.get('target-language', "en"))
+            conditions.append(phrase_text.match(
+                query,
+                postgresql_regconfig=PG_REG_CONFIG[lang]))
 
         columns = []
         columns.extend(pc)
@@ -116,8 +116,8 @@ class PhraseHandler(Handler):
         columns = []
         columns.extend(phrase.c)
         columns.append(
-            func.coalesce(
-                select([func.array_agg(gs_phrase.c.section_id)]).
+            f.coalesce(
+                select([f.array_agg(gs_phrase.c.section_id)]).
                 where(gs_phrase.c.phrase_id == phrase_id).
                 as_scalar(),
                 []
@@ -125,8 +125,8 @@ class PhraseHandler(Handler):
             label("grammar_sections")
         )
         columns.append(
-            func.coalesce(
-                select([func.array_agg(theme_phrase.c.theme_id)]).
+            f.coalesce(
+                select([f.array_agg(theme_phrase.c.theme_id)]).
                 where(theme_phrase.c.phrase_id == phrase_id).
                 as_scalar(),
                 []
