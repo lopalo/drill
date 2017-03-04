@@ -9,13 +9,13 @@ import Filters from "./Filters";
 import {requestPageData, loadMore} from "../actions";
 
 import {isAdmin} from "../../common/selectors";
+import {canLoadMore} from "../selectors";
 
 
 const LoadMoreButton = ({onClick}) =>
   <button
     type="submit"
     className="btn btn-primary"
-    autoFocus={true}
     onClick={onClick}>
     Load more
   </button>;
@@ -26,7 +26,7 @@ class Dictionary extends React.Component {
         this.props.onDidMount();
     }
     render() {
-        let {children, isAdmin, onLoadMoreClick} = this.props;
+        let {children, isAdmin, canLoadMore, onLoadMoreClick} = this.props;
         return (
           <div>
             {children}
@@ -54,9 +54,11 @@ class Dictionary extends React.Component {
               </div>
               <div className="col-md-10">
                 <List />
-                <div className="load-more">
-                  <LoadMoreButton onClick={onLoadMoreClick} />
-                </div>
+                {canLoadMore &&
+                    <div className="load-more">
+                      <LoadMoreButton onClick={onLoadMoreClick} />
+                    </div>
+                }
               </div>
             </div>
           </div>
@@ -65,7 +67,7 @@ class Dictionary extends React.Component {
 }
 
 
-const mapStateToProps = createStructuredSelector({isAdmin});
+const mapStateToProps = createStructuredSelector({isAdmin, canLoadMore});
 
 const mapDispatchToProps = dispatch => bindActionCreators({
     onDidMount: requestPageData,

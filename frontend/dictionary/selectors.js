@@ -10,6 +10,8 @@ const data = create(dictionary, dictionary => dictionary.data);
 
 const list = create(data, data => data.list);
 
+const canLoadMore = create(data, data => data.list.length < data.total);
+
 const grammarSections = create(data, data => data.grammarSections);
 
 const grammarSectionList = create(
@@ -31,4 +33,5 @@ export {
     grammarSectionList,
     themes,
     themeList,
+    canLoadMore
 };

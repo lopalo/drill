@@ -48,14 +48,16 @@ const ui = (state=initialUiState, action) => {
     }
 };
 
-const workingSet = (state=[], action) => {
+const workingSet = (state={}, action) => {
     switch (action.type) {
         case actions.PASS_PHRASE:
             return updateIn(state, [action.phraseId], p => phrase(p, action));
         case actions.COMPLETE_PHRASE:
             return unset(state, action.phraseId);
-        case actions.ADD_PHRASE:
-            return set(state, action.phrase.id, action.phrase);
+        case actions.ADD_PHRASE: {
+            let id = action.phrase.id;
+            return id in state ? state : set(state, id, action.phrase);
+        }
         default:
             return state;
     }

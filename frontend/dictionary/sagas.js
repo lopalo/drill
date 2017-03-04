@@ -48,12 +48,13 @@ function* doFetchList(more=false) {
         let offset = (yield select(list)).length;
         url += `&offset=${offset}`;
     }
-    let lst = yield* fetchJSON(url);
+    let {list: lst, total} = yield* fetchJSON(url);
     if (more) {
         yield put(actions.extendList(lst));
     } else {
         yield put(setProperty("pages.dictionary.data.list", lst));
     }
+    yield put(setProperty("pages.dictionary.data.total", total));
 }
 
 function* doFetchGroups() {

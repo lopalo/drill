@@ -79,13 +79,16 @@ class ListHandler(Handler):
 
         if "target-language" in params:
             conditions.append(pc.target_lang == params['target-language'])
-        text = params.get("text")
+        text = params.get("text", "")
         if text:
+            if isinstance(text, list):
+                text = "".join(text)
             query = " & ".join(filter(None, text.split(" ")))
-            lang = params.get('language', params.get('target-language', "en"))
-            conditions.append(phrase_text.match(
-                query,
-                postgresql_regconfig=PG_REG_CONFIG[lang]))
+            lang = params.get('language', guess_language(text))
+            if lang != "UNKNOWN":
+                conditions.append(phrase_text.match(
+                    query,
+                    postgresql_regconfig=PG_REG_CONFIG[lang]))
 
         columns = []
         columns.extend(pc)
@@ -98,14 +101,27 @@ class ListHandler(Handler):
             select(columns).
             distinct(pc.id).
             select_from(joined).
-            order_by(pc.id.desc())
-        ).limit(limit)
+            order_by(pc.id.desc()).
+            limit(limit)
+        )
+        count = select([pc.id]).distinct(pc.id).select_from(joined)
         if conditions:
             sel = sel.where(and_(*conditions))
+            count = count.where(and_(*conditions))
+        count = count.alias("count").count()
+        offset = 0
         if "offset" in params:
-            sel = sel.offset(params['offset'])
-        rows = self.db.execute(sel).fetchall()
-        resp.body = list(map(phrase_list_view, rows))
+            offset = params['offset']
+            sel = sel.offset(offset)
+        with self.db.begin() as conn:
+            rows = conn.execute(sel).fetchall()
+            total = conn.execute(count).scalar()
+        resp.body = {
+            "list": list(map(phrase_list_view, rows)),
+            "limit": limit,
+            "offset": offset,
+            "total": total
+        }
 
 
 @before(require_admin)

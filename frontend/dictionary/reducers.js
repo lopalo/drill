@@ -35,11 +35,13 @@ const list = (state=[], action) => {
             return state;
     }
 };
+const total = (state=0) => state;
 const themes = (state=[]) => state;
 const grammarSections = (state=[]) => state;
 
 const data = combineReducers({
     list,
+    total,
     themes,
     grammarSections
 });

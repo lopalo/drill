@@ -22,10 +22,16 @@ const textDifference = ({sourceText, targetText}) => (
 );
 
 const apostrophe = str => !str.includes("’");
+const doubleQuote = str => !str.includes("“") && !str.includes("”") ;
+const dash = str =>
+    !str.includes("‒") && !str.includes("–") &&
+    !str.includes("—") && !str.includes("―") ;
 
 const textErrorMessages = {
-    length: "Too short text",
-    apostrophe: "Wrong apostrophe"
+    length: "Too short text.",
+    apostrophe: "Wrong apostrophe.",
+    doubleQuote: "Wrong double quote.",
+    dash: "Dash is not allowed.",
 };
 
 const intList = l => l.map(i => parseInt(i));
@@ -49,11 +55,15 @@ const EditForm = ({
               "": {textDifference},
               sourceText: {
                   length: v => validator.isLength(v, {min: 3}),
-                  apostrophe
+                  apostrophe,
+                  doubleQuote,
+                  dash
               },
               targetText: {
                   length: v => validator.isLength(v, {min: 3}),
-                  apostrophe
+                  apostrophe,
+                  doubleQuote,
+                  dash
               },
           }}>
 
