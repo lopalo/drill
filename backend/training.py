@@ -61,11 +61,7 @@ class WorkingSetHandler(Handler):
             )).
             values(progress=user_phrase.c.repeats, completion_time=f.now())
         )
-        sel = (
-            select_expression(user_id).
-            limit(self.size(req)).
-            offset(self.size(req) - 1)
-        )
+        sel = select_expression(user_id).limit(self.size(req))
         with self.db.begin() as conn:
             conn.execute(upd)
             rows = conn.execute(sel).fetchall()
