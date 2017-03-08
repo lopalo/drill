@@ -6,7 +6,7 @@ import {
     PASS_PHRASE,
     COMPLETE_PHRASE,
     SPEAK,
-    addPhrase
+    updateWorkingSet
 } from "./actions";
 import {profile} from "../common/selectors";
 import {isCompleted, workingSet, phrase} from "./selectors";
@@ -61,9 +61,8 @@ function* completePhrase() {
     yield* takeEvery(COMPLETE_PHRASE, function* ({phraseId: id}) {
         yield* cancelSpeech();
         let url = "/training/working-set";
-        let newPhrase = yield* fetchJSON(url, {id}, {method: "POST"});
-        if (!newPhrase) return;
-        yield put(addPhrase(newPhrase));
+        let newWorkingSet = yield* fetchJSON(url, {id}, {method: "POST"});
+        yield put(updateWorkingSet(newWorkingSet));
     });
 }
 

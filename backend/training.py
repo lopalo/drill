@@ -36,14 +36,17 @@ class WorkingSetHandler(Handler):
         i['repeats'] = int(ceil(i['repeats'] * rfactor))
         return i
 
+    def make_working_set(self, rows, req):
+        dt_format = self.app_context.config['my-dictionary']['datetime-format']
+        view = phrase_view(dt_format)
+        return [self.convert_phrase_view(view(r), req) for r in rows]
+
     @after(json_response)
     def on_get(self, req, resp):
         user_id = req.context['user'].id
         sel = select_expression(user_id).limit(self.size(req))
         rows = self.db.execute(sel).fetchall()
-        dt_format = self.app_context.config['my-dictionary']['datetime-format']
-        view = phrase_view(dt_format)
-        resp.body = [self.convert_phrase_view(view(r), req) for r in rows]
+        resp.body = self.make_working_set(rows, req)
 
     @before(json_request)
     @after(json_response)
@@ -65,12 +68,8 @@ class WorkingSetHandler(Handler):
         )
         with self.db.begin() as conn:
             conn.execute(upd)
-            new_phrase = conn.execute(sel).fetchone()
-        if new_phrase is None:
-            return
-        dt_format = self.app_context.config['my-dictionary']['datetime-format']
-        resp.body = self.convert_phrase_view(
-            phrase_view(dt_format)(new_phrase), req)
+            rows = conn.execute(sel).fetchall()
+        resp.body = self.make_working_set(rows, req)
 
 
 @before(require_user)

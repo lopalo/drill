@@ -1,6 +1,7 @@
 import {combineReducers} from "redux";
 import initial from "lodash/initial";
-import {updateIn, filter, push, unset, set} from "icepick";
+import difference from "lodash/difference";
+import {updateIn, filter, unset} from "icepick";
 
 import * as actions from "./actions";
 
@@ -32,11 +33,13 @@ const ui = (state=initialUiState, action) => {
                 ...initialUiState,
                 ringQueue: filter(i => i != action.phraseId, ringQueue)
             };
-        case actions.ADD_PHRASE:
+        case actions.UPDATE_WORKING_SET: {
+            let newPhraseIds = difference(action.set.map(p => p.id), ringQueue);
             return {
                 ...state,
-                ringQueue: push(ringQueue, action.phrase.id)
+                ringQueue: [...ringQueue, ...newPhraseIds]
             };
+        }
         case actions.GIVE_UP:
             return {
                 ...state,
@@ -54,10 +57,11 @@ const workingSet = (state={}, action) => {
             return updateIn(state, [action.phraseId], p => phrase(p, action));
         case actions.COMPLETE_PHRASE:
             return unset(state, action.phraseId);
-        case actions.ADD_PHRASE: {
-            let id = action.phrase.id;
-            return id in state ? state : set(state, id, action.phrase);
-        }
+        case actions.UPDATE_WORKING_SET:
+            return action.set.reduce(
+                (state, phrase) =>
+                    phrase.id in state ? state :
+                        {...state, [phrase.id]: phrase}, state);
         default:
             return state;
     }
