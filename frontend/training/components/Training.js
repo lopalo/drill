@@ -136,12 +136,12 @@ var Training = class extends React.Component {
                     Progres +1
                   </button>
                 }
-                {isGivenUp &&
+                {(isGivenUp || isCompleted) &&
                   <button
                     className="btn btn-default"
                     onKeyDown={e => this.handleButtonKeyDown(e)}
                     onClick={onNextClick}
-                    autoFocus={true}>
+                    autoFocus={isGivenUp}>
                     Next
                   </button>
                 }

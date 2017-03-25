@@ -1,5 +1,5 @@
 /*global DEBUG*/
-import createLogger from "redux-logger";
+import {createLogger} from "redux-logger";
 import thunkMiddleware from "redux-thunk";
 import createSagaMiddleware from "redux-saga";
 import {routerMiddleware} from "react-router-redux";
@@ -35,6 +35,7 @@ export const configureMiddlewares = history => {
     if (DEBUG) {
         middlewares.push(createLogger({
             collapsed: true,
+            diff: true,
             actionTransformer: a => ({...a, type: a.type.toString()})
         }));
     }
