@@ -1,6 +1,7 @@
 var webpack = require("webpack");
 
-var DEV = process.env.NODE_ENV !== "production";
+var NODE_ENV = process.env.NODE_ENV || 'development';
+var DEV = NODE_ENV !== "production";
 
 var config = {
     entry: "./index",
@@ -28,6 +29,7 @@ var config = {
     devtool: DEV ? "eval-source-map" : "source-map",
     plugins: [
         new webpack.DefinePlugin({
+            'process.env.NODE_ENV': JSON.stringify(NODE_ENV),
             DEBUG: DEV
         })
     ]
