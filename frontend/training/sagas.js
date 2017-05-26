@@ -51,7 +51,7 @@ function* passPhrase() {
             let completed = (yield select(workingSet))[id].isCompleted;
             let url = "/training/increment-progress";
             if (!progress || completed) return;
-            yield* fetchJSON(url, {id, progress}, {method: "POST"});
+            //yield* fetchJSON(url, {id, progress}, {method: "POST"});
         }
     );
 }

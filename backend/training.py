@@ -24,12 +24,12 @@ class WorkingSetHandler(Handler):
 
     def convert_phrase_view(self, i, req):
         i = i.copy()
-        isCompleted = (
+        is_completed = (
             i['completionTime'] is not None or i['progress'] == i['repeats']
         )
-        i['isCompleted'] = isCompleted
+        i['isCompleted'] = is_completed
         i.pop('completionTime')
-        if not isCompleted or i['progress'] < i['repeats']:
+        if not is_completed or i['progress'] < i['repeats']:
             return i
         i['progress'] = 0
         rfactor = float(req.context['user'].profile['completed-repeat-factor'])

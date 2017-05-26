@@ -60,8 +60,10 @@ const workingSet = (state={}, action) => {
         case actions.UPDATE_WORKING_SET:
             return action.set.reduce(
                 (state, phrase) =>
-                    phrase.id in state ? state :
-                        {...state, [phrase.id]: phrase}, state);
+                    phrase.id in state ?
+                        state : {...state, [phrase.id]: phrase},
+                state
+            );
         default:
             return state;
     }
