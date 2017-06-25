@@ -45,6 +45,9 @@ var App = class extends React.Component {
           <div>
             <div className="navbar navbar-inverse">
               <Link to="/" className="navbar-brand">Drill</Link>
+              <a className="light-link" href="static/light/index.html">
+                Light
+              </a>
               <ul className="nav navbar-nav pull-right">
                 <NavItem to="/training">Training</NavItem>
                 <NavItem to="/my-dictionary">My Dictionary</NavItem>

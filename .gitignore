@@ -9,4 +9,5 @@ nohup.out
 .vagrant
 */node_modules
 bundle.js*
+public/light
 
