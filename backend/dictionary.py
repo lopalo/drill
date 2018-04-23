@@ -206,6 +206,16 @@ class PhraseHandler(Handler):
                 conn.execute(sections_ins)
         self._invalidate_groups_cache()
 
+    @before(json_request)
+    def on_patch(self, req, resp, phrase_id):
+        body = req.context['body']
+        upd = (
+            phrase.update().
+            where(phrase.c.id == phrase_id).
+            values(**self._to_db_row(body))
+        )
+        self.db.execute(upd)
+
     def on_delete(self, req, resp, phrase_id):
         delete = phrase.delete().where(phrase.c.id == phrase_id)
         self.db.execute(delete)
@@ -213,14 +223,20 @@ class PhraseHandler(Handler):
 
     @staticmethod
     def _to_db_row(fields):
-        source_text = fields['sourceText'].strip()
-        target_text = fields['targetText'].strip()
-        return {
-            'source_text': source_text,
-            'target_text': target_text,
-            'source_lang': guess_language(source_text),
-            'target_lang': guess_language(target_text),
-        }
+        source_text = fields.get('sourceText', "").strip()
+        target_text = fields.get('targetText', "").strip()
+        res = {}
+        if source_text:
+            res.update({
+                'source_text': source_text,
+                'source_lang': guess_language(source_text),
+            })
+        if target_text:
+            res.update({
+                'target_text': target_text,
+                'target_lang': guess_language(target_text),
+            })
+        return res
 
     def _invalidate_groups_cache(self):
         keys = GrammarSectionsHandler.key, ThemesHandler.key

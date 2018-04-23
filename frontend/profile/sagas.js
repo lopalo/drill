@@ -9,7 +9,7 @@ import {
     takeEverySafely as takeEvery
 } from "../common/sagas";
 
-function* setPhraseRepeats() {
+function* setProfileField() {
     yield* takeEvery(SET_FIELD, function* ({fieldName, value}) {
         yield* fetchJSON("/profile", {fieldName, value}, {method: "PATCH"});
     });
@@ -17,5 +17,5 @@ function* setPhraseRepeats() {
 
 
 export default [
-    setPhraseRepeats
+    setProfileField
 ];
