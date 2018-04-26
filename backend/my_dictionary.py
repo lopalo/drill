@@ -39,7 +39,8 @@ def select_expression(user_id):
         where(upc.user_id == user_id).
         order_by(
             upc.completion_time.asc().nullsfirst(),
-            (cast(upc.progress, Float) / upc.repeats).asc()
+            (cast(upc.progress, Float) / upc.repeats).asc(),
+            pc.id
         )
     )
     return sel
