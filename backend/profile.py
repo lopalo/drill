@@ -1,18 +1,17 @@
-from falcon import before, after
+from falcon import Request, Response, before
 
-from models import user
+from models import user_model
 from utils import (
     Handler, json_request,
     make_handlers, camel_to_kebab_case
 )
-from auth import require_user
+from auth import get_user
 
 
-@before(require_user)
 class ProfileHandler(Handler):
 
-    @before(json_request)
-    def on_patch(self, req, resp):
+    @before(json_request) #type: ignore
+    def on_patch(self, req: Request, resp: Response) -> None:
         usr = req.context['user']
         body = req.context['body']
         field_name = camel_to_kebab_case(body['fieldName'])
@@ -20,8 +19,8 @@ class ProfileHandler(Handler):
         assert field_name in usr.profile, field_name
         usr.profile[field_name] = value
         upd = (
-            user.update().
-            where(user.c.id == usr.id).
+            user_model.update().
+            where(user_model.c.id == usr.id).
             values(profile=usr.profile)
         )
         self.db.execute(upd)

@@ -6,18 +6,18 @@ redis:
     port: 6379
     db: 0
 session:
-    duration-seconds: 604800
+    duration_seconds: 604800
     secure: false
 dictionary:
     limit: 15
-my-dictionary:
-    datetime-format: "%Y-%m-%d %H:%M"
-default-profile:
-    training-type: typing
-    auto-speak: true
-    speak-language: en
+my_dictionary:
+    datetime_format: "%Y-%m-%d %H:%M"
+default_profile:
+    training_type: typing
+    auto_speak: true
+    speak_language: en
 
-    working-set-size: 10
+    working_set_size: 10
     repeats: 5
-    completed-repeat-factor: 0.35
+    completed_repeat_factor: 0.35
 

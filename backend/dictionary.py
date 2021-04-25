@@ -4,9 +4,9 @@ from sqlalchemy.sql import func as f
 from guess_language import guess_language
 
 from utils import Handler, json_response, json_request, make_handlers
-from auth import require_user, require_admin
+from auth import get_user, get_admin
 from models import (
-    phrase, user_phrase, user,
+    phrase, user_phrase, user_model,
     grammar_section_phrase as gs_phrase,
     theme_phrase, phrase_text, PG_REG_CONFIG
 )
@@ -40,7 +40,6 @@ def phrase_editor_view(row):
     return res
 
 
-@before(require_user)
 class ListHandler(Handler):
 
     @after(json_response)
@@ -58,8 +57,8 @@ class ListHandler(Handler):
             label("is_in_my_dict")
         )
         joined = phrase.join(
-            user,
-            pc.added_by_user_id == user.c.id,
+            user_model,
+            pc.added_by_user_id == user_model.c.id,
             isouter=True
         )
         if "grammar-section" in params:
@@ -94,7 +93,7 @@ class ListHandler(Handler):
         columns.extend(pc)
         columns.extend([
             is_in_my_dict,
-            user.c.name.label("added_by")
+            user_model.c.name.label("added_by")
         ])
         limit = self.app_context.config['dictionary']['limit']
         sel = (

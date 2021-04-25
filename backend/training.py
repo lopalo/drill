@@ -6,11 +6,10 @@ from sqlalchemy.sql import func as f
 
 from utils import Handler, json_request, json_response, make_handlers
 from models import user_phrase
-from auth import require_user
+from auth import get_user
 from my_dictionary import select_expression, phrase_view
 
 
-@before(require_user)
 class WorkingSetHandler(Handler):
 
 
@@ -68,7 +67,6 @@ class WorkingSetHandler(Handler):
         resp.body = self.make_working_set(rows, req)
 
 
-@before(require_user)
 class IncrementProgressHanlder(Handler):
 
     @before(json_request)

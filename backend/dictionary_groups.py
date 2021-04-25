@@ -5,7 +5,7 @@ from sqlalchemy import func as f, select
 from sqlalchemy.exc import IntegrityError
 
 from utils import Handler, json_response, json_request
-from auth import require_admin
+from auth import get_admin
 from models import grammar_section, grammar_section_phrase, theme, theme_phrase
 
 
@@ -69,7 +69,6 @@ class GrammarSectionsHandler(GroupHandler):
         )
         return {r.id: item_view(r) for r in self.db.execute(sel).fetchall()}
 
-    @before(require_admin)
     @before(json_request)
     def on_post(self, req, resp):
         body = req.context['body']
@@ -120,7 +119,6 @@ class ThemesHandler(GroupHandler):
         )
         return {r.id: item_view(r) for r in self.db.execute(sel).fetchall()}
 
-    @before(require_admin)
     @before(json_request)
     def on_post(self, req, resp):
         body = req.context['body']

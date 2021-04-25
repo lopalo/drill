@@ -10,4 +10,8 @@ nohup.out
 */node_modules
 bundle.js*
 public/light
+.venv
+Session.vim
+.pyre
+.pyre_configuration
 

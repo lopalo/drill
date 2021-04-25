@@ -49,7 +49,7 @@ def gen_tsvector_for_lang():
         default=PG_REG_CONFIG["en"])
 
 
-user = Table(
+user_model = Table(
     "user", metadata,
     Column("id", Integer, primary_key=True),
     Column("name", String(50), nullable=False),

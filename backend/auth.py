@@ -1,199 +1,149 @@
-import os
-import base64
-import json
+from __future__ import annotations
+from typing import Optional
 
-import bcrypt
+import bcrypt  # type: ignore
 
-from falcon import before, after, HTTPUnauthorized, HTTPForbidden
+from falcon import Request, Response
+from falcon.errors import HTTPForbidden, HTTPUnauthorized
+from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 
-from models import user
-from utils import (
-    Handler, json_request, json_response,
-    make_handlers, kebab_to_camel_case
-)
+from common import AppContext
+from user import User, UserClientView, sid_key
+from models import user_model
+from utils import Handler, json_handler, make_handlers
 
 
-def sid_key(sid):
-    return "session_id:" + sid
-
-#TODO: user's account activation via e-mail confirmation
-#TODO: validate request arguments
-
-class User:
-
-    def __init__(self, fields, session_id=None):
-        fields = dict(fields)
-        self._fields = fields
-        self._session_id = session_id
-
-    def __getattr__(self, name):
-        if name not in self._fields:
-            raise AttributeError
-        return self._fields[name]
-
-    @property
-    def client_view(self):
-        fields = self._fields
-        return {
-            'name': fields['name'],
-            'email': fields['email'],
-            'isAdmin': fields['is_admin'],
-            'profile': {kebab_to_camel_case(k): v for k, v in
-                        fields['profile'].items()}
-        }
-
-    @property
-    def as_json(self):
-        return json.dumps(self._fields).encode("utf-8")
-
-    @classmethod
-    def from_json(cls, data, session_id=None):
-        return cls(json.loads(data.decode("utf-8")), session_id)
-
-    def init_profile(self, app_context):
-        for k, v in app_context.config['default-profile'].items():
-            if k not in self.profile:
-                self.profile[k] = v
-
-    def create_session(self, app_context, resp):
-        sid = self._create_session_id()
-        config = app_context.config['session']
-        duration = config['duration-seconds']
-        self._session_id = sid
-        resp.set_cookie(
-            "session_id", sid,
-            max_age=duration,
-            path="/",
-            http_only=False,
-            secure=config['secure'])
-        app_context.redis.set(sid_key(sid), self.as_json, ex=duration)
-
-    def update_session(self, app_context):
-        config = app_context.config['session']
-        duration = config['duration-seconds']
-        app_context.redis.set(
-            sid_key(self._session_id),
-            self.as_json, ex=duration)
-
-    def delete_session(self, app_context, resp):
-        resp.unset_cookie("session_id")
-        app_context.redis.delete(sid_key(self._session_id))
-
-    @staticmethod
-    def _create_session_id():
-        return base64.b64encode(os.urandom(20)).decode("ascii")
-
+# TODO: user's account activation via e-mail confirmation
 
 class AuthMiddleware:
-
-    def __init__(self, app_context):
+    def __init__(self, app_context: AppContext):
         self.app_context = app_context
 
-    def process_request(self, req, resp):
-        req.context['user'] = None
-        config = self.app_context.config['session']
-        duration = config['duration-seconds']
-        sid = req.cookies.get('session_id')
+    def process_request(self, req: Request, resp: Response) -> None:
+        req.context["user"] = None
+        config = self.app_context.config.session
+        duration = config.duration_seconds
+        sid = req.cookies.get("session_id")
         if sid is None:
             return
-        pipe = self.app_context.redis.pipeline()
+        redis = self.app_context.redis
         skey = sid_key(sid)
-        data, _ = pipe.get(skey).expire(skey, duration).execute()
+        data = redis.get(skey)
+        redis.expire(skey, duration)
         if data is None:
             return
-        req.context['user'] = User.from_json(data, sid)
+        req.context["user"] = User.from_json(data, sid)
         resp.set_cookie(
-            "session_id", sid,
+            "session_id",
+            sid,
             max_age=duration,
             path="/",
             http_only=False,
-            secure=config['secure'])
+            secure=config.secure,
+        )
 
 
-def require_user(req, resp, resource, params):
+def get_user(req: Request) -> User:
+    user = req.context["user"]
     if req.context["user"] is None:
         raise HTTPUnauthorized("Authentication Required", "", [])
+    assert isinstance(user, User)
+    return user
 
 
-def require_admin(req, resp, resource, params):
-    require_user(req, resp, resource, params)
-    if not req.context["user"].is_admin:
+def get_admin(req: Request) -> User:
+    user = get_user(req)
+    if not user.record.is_admin:
         raise HTTPForbidden("Permission Denied", "User must be an admin")
+    return user
 
 
 class UserHandler(Handler):
+    @json_handler
+    def on_get(self, req: Request, resp: Response, *, payload: None) -> UserClientView:
+        return get_user(req).client_view
 
-    @before(require_user)
-    @after(json_response)
-    def on_get(self, req, resp):
-        resp.body = req.context['user'].client_view
+
+class LoginInput(BaseModel):
+    email: str
+    password: str
+
+
+class LoginOutput(BaseModel):
+    user: Optional[UserClientView]
+    error: Optional[str]
 
 
 class LoginHandler(Handler):
+    @json_handler
+    def on_post(
+        self, req: Request, resp: Response, *, payload: LoginInput
+    ) -> LoginOutput:
+        error_output = LoginOutput(error="Wrong email or password")
 
-    @before(json_request)
-    @after(json_response)
-    def on_post(self, req, resp):
-        body = req.context['body']
-        result = resp.body = {'error': None, 'user': None}
-        error = "Wrong email or password"
-
-        sel = user.select().where(user.c.email == body['email'])
+        sel = user_model.select().where(user_model.c.email == payload.email)
         with self.db.begin() as conn:
             user_record = conn.execute(sel).fetchone()
         if user_record is None:
-            result['error'] = error
-            return
+            return error_output
 
         usr = User(user_record.items())
-        password = body['password'].encode("utf-8")
-        user_password = usr.password.encode("utf-8")
+        password = payload.password.encode("utf-8")
+        user_password = usr.record.password.encode("utf-8")
         if bcrypt.hashpw(password, user_password) != user_password:
-            result['error'] = error
-            return
+            return error_output
         usr.init_profile(self.app_context)
         usr.create_session(self.app_context, resp)
-        result['user'] = usr.client_view
+        return LoginOutput(user=usr.client_view)
 
 
 class LogoutHandler(Handler):
+    def on_post(self, req: Request, resp: Response) -> None:
+        get_user(req).delete_session(self.app_context, resp)
 
-    @before(require_user)
-    def on_post(self, req, resp):
-        req.context['user'].delete_session(self.app_context, resp)
+
+class RegisterInput(BaseModel):
+    name: str
+    email: str
+    password: str
+
+
+class RegisterOutput(BaseModel):
+    user: Optional[UserClientView]
+    error: Optional[str]
 
 
 class RegisterHandler(Handler):
+    @json_handler
+    def on_post(
+        self, req: Request, resp: Response, *, payload: RegisterInput
+    ) -> RegisterOutput:
 
-    @before(json_request)
-    @after(json_response)
-    def on_post(self, req, resp):
-        body = req.context['body']
-        result = resp.body = {'error': None, 'user': None}
-
-        password = body['password'].encode("utf-8")
+        password = payload.password.encode("utf-8")
         values = dict(
-            name=body['name'],
-            email=body['email'],
-            password=bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
+            name=payload.name,
+            email=payload.email,
+            password=bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8"),
         )
-        ins = user.insert().values(**values).returning(*user.c)
+        ins = user_model.insert().values(**values).returning(*user_model.c)
         with self.db.begin() as conn:
             try:
                 user_record = conn.execute(ins).fetchone()
             except IntegrityError:
-                result['error'] = "E-mail is already used"
-                return
+                return RegisterOutput(error="E-mail is already used")
         usr = User(user_record.items())
         usr.init_profile(self.app_context)
         usr.create_session(self.app_context, resp)
-        result['user'] = usr.client_view
+        return RegisterOutput(user=usr.client_view)
 
 
-configure_handlers = make_handlers("/auth/", [
-    ("user", UserHandler),
-    ("login", LoginHandler),
-    ("logout", LogoutHandler),
-    ("register", RegisterHandler)
-])
+configure_handlers = make_handlers(
+    "/auth/",
+    [
+        ("user", UserHandler),
+        ("login", LoginHandler),
+        ("logout", LogoutHandler),
+        ("register", RegisterHandler),
+    ],
+)

@@ -2,7 +2,7 @@ from falcon import before, after
 from sqlalchemy import Float, select, and_, cast
 
 from utils import Handler, json_response, json_request, make_handlers
-from auth import require_user
+from auth import get_user
 from models import phrase, user_phrase
 
 
@@ -46,7 +46,6 @@ def select_expression(user_id):
     return sel
 
 
-@before(require_user)
 class ListHandler(Handler):
 
     @after(json_response)
@@ -57,7 +56,6 @@ class ListHandler(Handler):
         resp.body = list(map(phrase_view(dt_format), rows))
 
 
-@before(require_user)
 class PhraseHandler(Handler):
 
     @before(json_request)

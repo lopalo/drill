@@ -27,6 +27,7 @@ services:
             - "../db:/var/lib/postgresql/data"
             - "./postgresql.conf:/var/lib/postgresql/data/postgresql.conf"
             - "../logs:/var/lib/postgresql/data/logs"
+            - "../db/dumps:/var/lib/postgresql/dumps"
         # for making dumps
         ports:
             - "127.0.0.1:5432:5432"
